@@ -1,0 +1,14 @@
+[
+	"api_info": 
+	{
+		"apiKey": "AIzaSyBhl_zBnEEv_xiIukkMpz8ayoiwT1UdfQk",
+		"maxResult": 40,
+		"youtube_url": "https://www.googleapis.com/youtube/v3/search/?part=snippet"
+	},
+	"settings":
+	{
+		"appTheme": "light",
+		"safeSearch": "moderate",
+		"thumbnailsQuality": "default",
+	}
+]
