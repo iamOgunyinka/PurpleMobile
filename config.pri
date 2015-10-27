@@ -51,18 +51,18 @@ config_pri_assets {
 config_pri_source_group1 {
     SOURCES += \
         $$quote($$BASEDIR/src/ProjectFile.cpp) \
+        $$quote($$BASEDIR/src/Settings.cpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.cpp) \
         $$quote($$BASEDIR/src/applicationui.cpp) \
         $$quote($$BASEDIR/src/main.cpp) \
-        $$quote($$BASEDIR/src/result.cpp) \
-        $$quote($$BASEDIR/src/settings.cpp)
+        $$quote($$BASEDIR/src/result.cpp)
 
     HEADERS += \
         $$quote($$BASEDIR/src/ProjectFile.hpp) \
+        $$quote($$BASEDIR/src/Settings.hpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.hpp) \
         $$quote($$BASEDIR/src/applicationui.hpp) \
-        $$quote($$BASEDIR/src/result.hpp) \
-        $$quote($$BASEDIR/src/settings.hpp)
+        $$quote($$BASEDIR/src/result.hpp)
 }
 
 CONFIG += precompile_header

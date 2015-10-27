@@ -1,8 +1,8 @@
 #ifndef SETTINGS_HPP_
 #define SETTINGS_HPP_
 
-#include <QObject>
 #include "ProjectFile.hpp"
+#include <QString>
 
 namespace data
 {
@@ -29,14 +29,14 @@ namespace Purple
         QString youtubeUrl();
         int maxResult();
 
-        QString appTheme();
-        void setAppTheme( QString const & theme );
+        Q_INVOKABLE QString appTheme();
+        Q_INVOKABLE void setAppTheme( QString const & theme );
 
-        QString safeSearch();
-        void setSafeSearch( QString const & safe_search );
+        Q_INVOKABLE QString safeSearch();
+        Q_INVOKABLE void setSafeSearch( QString const & safe_search );
 
-        QString thumbnailsQuality();
-        void setThumbnailsQuality( QString const & thumbnails_quality );
+        Q_INVOKABLE QString thumbnailsQuality();
+        Q_INVOKABLE void setThumbnailsQuality( QString const & thumbnails_quality );
     signals:
         void errorOccurred( QString const & error );
         void thumbnailsQualityChanged( QString const & newThumbnailsQuality );

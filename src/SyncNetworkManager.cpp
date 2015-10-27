@@ -18,9 +18,9 @@ namespace Purple
         request.setRawHeader( "Agent", "Wiikast Purple" );
 
         QNetworkReply *reply = m_networkManager.get( request );
-        QObject::connect( reply, SIGNAL( finished()), this, SLOT ( onFinished() ) );
-        QObject::connect( reply, SIGNAL( error( QNetworkReply::NetworkError )),
-                this, SLOT( onNetworkError( QNetworkReply::NetworkError )));
+        QObject::connect( reply, SIGNAL( finished()), this, SLOT( onFinished() ) );
+        QObject::connect( reply, SIGNAL( error( QNetworkReply::NetworkError )), this, SLOT( onError( QNetworkReply::NetworkError )));
+
         m_requestQueue.push_back( reply );
     }
 
@@ -50,8 +50,8 @@ namespace Purple
         return QUrl::toPercentEncoding( text );
     }
 
-    //Blackberry NDK 1.0 refuses namespace( fully ) qualified conditionals like QNetworkReply::NetwokError::RemostHostClosedError
-    void SyncNetworkManager::onNetworkError( QNetworkReply::NetworkError error )
+    //Blackberry NDK 2.0 refuses namespace( fully ) qualified conditionals like QNetworkReply::NetwokError::RemostHostClosedError
+    void SyncNetworkManager::onError( QNetworkReply::NetworkError error )
     {
         switch( error )
         {

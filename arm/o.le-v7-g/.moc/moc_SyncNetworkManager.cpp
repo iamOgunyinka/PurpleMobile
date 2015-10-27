@@ -39,9 +39,9 @@ static const uint qt_meta_data_Purple__SyncNetworkManager[] = {
      117,   27,   27,   27, 0x0a,
 
  // methods: signature, parameters, type, tag, flags
-     169,  161,   27,   27, 0x02,
-     190,   27,   27,   27, 0x02,
-     223,  218,  210,   27, 0x02,
+     162,  154,   27,   27, 0x02,
+     183,   27,   27,   27, 0x02,
+     216,  211,  203,   27, 0x02,
 
        0        // eod
 };
@@ -50,7 +50,7 @@ static const char qt_meta_stringdata_Purple__SyncNetworkManager[] = {
     "Purple::SyncNetworkManager\0\0what\0"
     "networkError(QString)\0errorOccurred(QString)\0"
     "message\0finished(QString)\0onFinished()\0"
-    "onNetworkError(QNetworkReply::NetworkError)\0"
+    "onError(QNetworkReply::NetworkError)\0"
     "request\0sendRequest(QString)\0"
     "cancelLastRequest()\0QString\0text\0"
     "toPercentageEncoding(QString)\0"
@@ -66,7 +66,7 @@ void Purple::SyncNetworkManager::qt_static_metacall(QObject *_o, QMetaObject::Ca
         case 1: _t->errorOccurred((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 2: _t->finished((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 3: _t->onFinished(); break;
-        case 4: _t->onNetworkError((*reinterpret_cast< QNetworkReply::NetworkError(*)>(_a[1]))); break;
+        case 4: _t->onError((*reinterpret_cast< QNetworkReply::NetworkError(*)>(_a[1]))); break;
         case 5: _t->sendRequest((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 6: _t->cancelLastRequest(); break;
         case 7: { QString _r = _t->toPercentageEncoding((*reinterpret_cast< const QString(*)>(_a[1])));

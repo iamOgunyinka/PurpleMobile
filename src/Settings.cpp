@@ -7,7 +7,7 @@
 
 #include <bb/data/JsonDataAccess>
 #include <QDir>
-#include <src/settings.hpp>
+#include <src/Settings.hpp>
 
 namespace Purple
 {
@@ -29,6 +29,14 @@ namespace Purple
 
     QString Settings::apiKey()          { return m_projectFileHandler->apiInfo().apiKey(); }
 
+    QString Settings::safeSearch() { return m_projectFileHandler->appSettings().safeSearch(); }
+
+    QString Settings::thumbnailsQuality() { return m_projectFileHandler->appSettings().thumbnailsQuality(); }
+
+    void Settings::setAppTheme( QString const & app_theme ){ m_projectFileHandler->appSettings().setAppTheme( app_theme ); }
+
+    QString Settings::appTheme() { return m_projectFileHandler->appSettings().appTheme(); }
+
     void Settings::setSafeSearch( QString const & safe_search )
     {
         if( safe_search != m_projectFileHandler->appSettings().safeSearch() ){
@@ -37,7 +45,6 @@ namespace Purple
         }
     }
 
-    QString Settings::safeSearch() { return m_projectFileHandler->appSettings().safeSearch(); }
 
     void Settings::setThumbnailsQuality( QString const & thumbnails_quality )
     {
@@ -47,16 +54,10 @@ namespace Purple
         }
     }
 
-    QString Settings::thumbnailsQuality() { return m_projectFileHandler->appSettings().thumbnailsQuality(); }
-
-    void Settings::setAppTheme( QString const & app_theme ){ m_projectFileHandler->appSettings().setAppTheme( app_theme ); }
-
-    QString Settings::appTheme() { return m_projectFileHandler->appSettings().appTheme(); }
-
     void Settings::settings()
     {
         bb::data::JsonDataAccess jda;
-        QVariant keyMap = jda.load( "asset:///apikey_file.json" );
+        QVariant keyMap = jda.load( "asset:///project_file.json" );
 
         if( jda.hasError() ){
             emit errorOccurred( "Unable to load API Key from current location" );

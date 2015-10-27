@@ -1,14 +1,14 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'settings.hpp'
+** Meta object code from reading C++ file 'Settings.hpp'
 **
 ** Created by: The Qt Meta Object Compiler version 63 (Qt 4.8.5)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "../../../src/settings.hpp"
+#include "../../../src/Settings.hpp"
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'settings.hpp' doesn't include <QObject>."
+#error "The header file 'Settings.hpp' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 63
 #error "This file was generated using the moc from 4.8.5. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -22,8 +22,8 @@ static const uint qt_meta_data_Purple__Settings[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       3,   14, // methods
-       6,   29, // properties
+       9,   14, // methods
+       6,   59, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
@@ -34,13 +34,21 @@ static const uint qt_meta_data_Purple__Settings[] = {
       68,   47,   17,   17, 0x05,
      116,  102,   17,   17, 0x05,
 
+ // methods: signature, parameters, type, tag, flags
+     151,   17,  143,   17, 0x02,
+     168,  162,   17,   17, 0x02,
+     189,   17,  143,   17, 0x02,
+     214,  202,   17,   17, 0x02,
+     237,   17,  143,   17, 0x02,
+     276,  257,   17,   17, 0x02,
+
  // properties: name, type, flags
-     151,  143, 0x0a095001,
-     158,  143, 0x0a095001,
-     173,  169, 0x02095001,
-     183,  143, 0x0a095103,
-     192,  143, 0x0a495103,
-     203,  143, 0x0a495103,
+     306,  143, 0x0a095001,
+     313,  143, 0x0a095001,
+     328,  324, 0x02095001,
+     338,  143, 0x0a095103,
+     347,  143, 0x0a495103,
+     358,  143, 0x0a495103,
 
  // properties: notify_signal_id
        0,
@@ -58,7 +66,11 @@ static const char qt_meta_stringdata_Purple__Settings[] = {
     "newThumbnailsQuality\0"
     "thumbnailsQualityChanged(QString)\0"
     "newSafeSearch\0safeSearchChanged(QString)\0"
-    "QString\0apiKey\0youtubeUrl\0int\0maxResult\0"
+    "QString\0appTheme()\0theme\0setAppTheme(QString)\0"
+    "safeSearch()\0safe_search\0"
+    "setSafeSearch(QString)\0thumbnailsQuality()\0"
+    "thumbnails_quality\0setThumbnailsQuality(QString)\0"
+    "apiKey\0youtubeUrl\0int\0maxResult\0"
     "appTheme\0safeSearch\0thumbnailsQuality\0"
 };
 
@@ -71,6 +83,15 @@ void Purple::Settings::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
         case 0: _t->errorOccurred((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 1: _t->thumbnailsQualityChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         case 2: _t->safeSearchChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 3: { QString _r = _t->appTheme();
+            if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = _r; }  break;
+        case 4: _t->setAppTheme((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 5: { QString _r = _t->safeSearch();
+            if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = _r; }  break;
+        case 6: _t->setSafeSearch((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 7: { QString _r = _t->thumbnailsQuality();
+            if (_a[0]) *reinterpret_cast< QString*>(_a[0]) = _r; }  break;
+        case 8: _t->setThumbnailsQuality((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -108,9 +129,9 @@ int Purple::Settings::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 3)
+        if (_id < 9)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 9;
     }
 #ifndef QT_NO_PROPERTIES
       else if (_c == QMetaObject::ReadProperty) {

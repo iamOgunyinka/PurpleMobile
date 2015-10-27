@@ -1,7 +1,6 @@
 import bb.cascades 1.0
-import bb.data 1.0
 import bb.system 1.0
-import purple.settings 1.0
+import bb.data 1.0
 
 TabbedPane {
     id: root
@@ -15,7 +14,6 @@ TabbedPane {
     }
     attachedObjects: [
         MySettings {
-            
         },
         SystemDialog {
             id: errorDialog
@@ -31,10 +29,10 @@ TabbedPane {
                 }
                 MySettings {
                     onAppThemeChanged: {
-                        appTheme = _tools.appSettings.appTheme
+//                        appTheme = _tools.appSettings.appTheme
                     }
                     onMaxResultsChanged: {
-                        maxResults = _tools.appSettings.maxResult
+//                        maxResults = _tools.appSettings.maxResult
                     }
                 }
             }
@@ -58,12 +56,11 @@ TabbedPane {
 
         function processRequest( query )
         {
-            var m_url = _tools.appSettings.youtubeUrl()
+            var m_url = _tools.appSettings.youtubeUrl
+            console.log( m_url )
             m_url = m_url + "&q=" + _tools.networkManager.toPercentage( query );
-            m_url = m_url + "&maxResults=" + _tools.networkManager.maxResults()
-            m_url = m_url + "&key=" + _tools.networkManager.apiKey();
-            
-            _tools.networkManager.sendRequest( m_url );
+            m_url = m_url + "&maxResults=" + _tools.networkManager.maxResults
+            m_url = m_url + "&key=" + _tools.networkManager.apiKey;
         }
         
         Page {
@@ -145,7 +142,7 @@ TabbedPane {
                                 if( txtSearch.text.valueOf() == "".valueOf() ){
                                     myResult.setText( "Empty Search" )
                                 } else {
-                                    root.processRequest( txtSearch.text )              
+                                    homeTab.processRequest( txtSearch.text )
                                 }
                             }
                         }
@@ -159,7 +156,7 @@ TabbedPane {
                             if( txtSearch.text.valueOf() == "".valueOf() ){
                                 myResult.setText( "Empty Search" )
                             } else {
-                                root.processRequest( txtSearch.text )
+                                homeTab.processRequest( txtSearch.text )
                             }
                         }
                     }
@@ -200,7 +197,7 @@ TabbedPane {
             }
         }
         onCreationCompleted: {
-            _tools.networkManager.errorOccurred.connect( errorGotten )
+//            _tools.networkManager.errorOccurred.connect( errorGotten )            
             _tools.networkManager.finished.connect( searchResultObtained )
             _tools.networkManager.networkError.connect( errorGotten )
         }

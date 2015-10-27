@@ -16,7 +16,7 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-static const uint qt_meta_data_ApplicationUI[] = {
+static const uint qt_meta_data_Purple__ApplicationUI[] = {
 
  // content:
        6,       // revision
@@ -30,22 +30,22 @@ static const uint qt_meta_data_ApplicationUI[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      15,   14,   14,   14, 0x08,
+      23,   22,   22,   22, 0x08,
 
  // properties: name, type, flags
-      51,   41, 0x00095009,
-      83,   63, 0x00095009,
+      59,   49, 0x00095009,
+      91,   71, 0x00095009,
 
        0        // eod
 };
 
-static const char qt_meta_stringdata_ApplicationUI[] = {
-    "ApplicationUI\0\0onSystemLanguageChanged()\0"
+static const char qt_meta_stringdata_Purple__ApplicationUI[] = {
+    "Purple::ApplicationUI\0\0onSystemLanguageChanged()\0"
     "Settings*\0appSettings\0SyncNetworkManager*\0"
     "networkManager\0"
 };
 
-void ApplicationUI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void Purple::ApplicationUI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
         Q_ASSERT(staticMetaObject.cast(_o));
@@ -58,33 +58,33 @@ void ApplicationUI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData ApplicationUI::staticMetaObjectExtraData = {
+const QMetaObjectExtraData Purple::ApplicationUI::staticMetaObjectExtraData = {
     0,  qt_static_metacall 
 };
 
-const QMetaObject ApplicationUI::staticMetaObject = {
-    { &QObject::staticMetaObject, qt_meta_stringdata_ApplicationUI,
-      qt_meta_data_ApplicationUI, &staticMetaObjectExtraData }
+const QMetaObject Purple::ApplicationUI::staticMetaObject = {
+    { &QObject::staticMetaObject, qt_meta_stringdata_Purple__ApplicationUI,
+      qt_meta_data_Purple__ApplicationUI, &staticMetaObjectExtraData }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &ApplicationUI::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &Purple::ApplicationUI::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *ApplicationUI::metaObject() const
+const QMetaObject *Purple::ApplicationUI::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *ApplicationUI::qt_metacast(const char *_clname)
+void *Purple::ApplicationUI::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_ApplicationUI))
+    if (!strcmp(_clname, qt_meta_stringdata_Purple__ApplicationUI))
         return static_cast<void*>(const_cast< ApplicationUI*>(this));
     return QObject::qt_metacast(_clname);
 }
 
-int ApplicationUI::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int Purple::ApplicationUI::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QObject::qt_metacall(_c, _id, _a);
     if (_id < 0)

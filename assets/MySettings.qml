@@ -1,5 +1,4 @@
 import bb.cascades 1.0
-import purple.settings 1.0
 
 Container {
     property string  thumbnailsQuality;
@@ -24,21 +23,21 @@ Container {
         options: [
             Option {
                 text: "Light"
-                value: "Light"
+                value: 0
             },
             Option {
                 text: "Dark"
-                value: "Dark"
+                value: 1
             }
         ]
         onSelectedIndexChanged: {
             switch ( selectedIndex ){
-                case "Dark":{
-                        appTheme = appThemeOption.selectedOption.value
+                case 0:{
+                        appTheme = "Dark"
                         break;
                 }
-            case "Light": {
-                    appTheme = appThemeOption.selectedOption.value
+            case 1: {
+                    appTheme = "Light"
                     break;
             }
         default :
@@ -46,7 +45,7 @@ Container {
             }
         }
         onCreationCompleted: {
-            appThemeOption.selectedOption.value = "Light"
+            appThemeOption.setSelectedIndex( 0 )
         }
     }
     Divider {}

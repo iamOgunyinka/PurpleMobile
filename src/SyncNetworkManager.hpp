@@ -12,14 +12,7 @@ namespace Purple
     class SyncNetworkManager: public QObject
     {
         Q_OBJECT
-	private:
 
-        QNetworkAccessManager m_networkManager;
-        QList<QNetworkReply*> m_requestQueue;
-
-	public slots:
-		Q_SLOT void onFinished();
-		Q_SLOT void onNetworkError( QNetworkReply::NetworkError );
 	public:
         SyncNetworkManager( QObject *parent = NULL );
         virtual ~SyncNetworkManager();
@@ -27,6 +20,12 @@ namespace Purple
         Q_INVOKABLE void sendRequest( QString const & request );
         Q_INVOKABLE void cancelLastRequest();
         Q_INVOKABLE QString toPercentageEncoding( QString const & text );
+	private:
+        QNetworkAccessManager m_networkManager;
+        QList<QNetworkReply*> m_requestQueue;
+	public slots:
+		Q_SLOT void onFinished();
+		Q_SLOT void onError( QNetworkReply::NetworkError );
     signals:
         void networkError( QString const & what );
         void errorOccurred( QString const & what );
