@@ -1,5 +1,5 @@
-#ifndef SETTINGS_HPP_
-#define SETTINGS_HPP_
+#ifndef PROJECT_SETTINGS_HPP_
+#define PROJECT_SETTINGS_HPP_
 
 #include "ProjectFile.hpp"
 #include <QString>
@@ -11,7 +11,7 @@ namespace data
 
 namespace Purple
 {
-    class Settings: public QObject
+    class ProjectSettings: public QObject
     {
         Q_OBJECT
 
@@ -22,8 +22,8 @@ namespace Purple
         Q_PROPERTY( QString safeSearch READ safeSearch WRITE setSafeSearch NOTIFY safeSearchChanged )
         Q_PROPERTY( QString thumbnailsQuality READ thumbnailsQuality WRITE setThumbnailsQuality NOTIFY thumbnailsQualityChanged )
     public:
-        Settings( QObject *parent = 0 );
-        virtual ~Settings();
+        ProjectSettings( QObject *parent = 0 );
+        virtual ~ProjectSettings();
 
         QString apiKey();
         QString youtubeUrl();
@@ -48,4 +48,4 @@ namespace Purple
 
 } /* namespace Purple */
 
-#endif /* SETTINGS_HPP_ */
+#endif /* PROJECT_SETTINGS_HPP_ */

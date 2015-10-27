@@ -7,37 +7,37 @@
 
 #include <bb/data/JsonDataAccess>
 #include <QDir>
-#include <src/Settings.hpp>
+#include <src/ProjectSettings.hpp>
 
 namespace Purple
 {
-    Settings::Settings( QObject *parent ):
+    ProjectSettings::ProjectSettings( QObject *parent ):
             QObject( parent ),
             m_projectFileHandler( new Purple::ProjectFile )
     {
         settings();
     }
 
-    Settings::~Settings()
+    ProjectSettings::~ProjectSettings()
     {
         //
     }
 
-    int     Settings::maxResult()       { return m_projectFileHandler->apiInfo().maxResults(); }
+    int     ProjectSettings::maxResult()       { return m_projectFileHandler->apiInfo().maxResults(); }
 
-    QString Settings::youtubeUrl()      { return m_projectFileHandler->apiInfo().youtubeUrl(); }
+    QString ProjectSettings::youtubeUrl()      { return m_projectFileHandler->apiInfo().youtubeUrl(); }
 
-    QString Settings::apiKey()          { return m_projectFileHandler->apiInfo().apiKey(); }
+    QString ProjectSettings::apiKey()          { return m_projectFileHandler->apiInfo().apiKey(); }
 
-    QString Settings::safeSearch() { return m_projectFileHandler->appSettings().safeSearch(); }
+    QString ProjectSettings::safeSearch() { return m_projectFileHandler->appSettings().safeSearch(); }
 
-    QString Settings::thumbnailsQuality() { return m_projectFileHandler->appSettings().thumbnailsQuality(); }
+    QString ProjectSettings::thumbnailsQuality() { return m_projectFileHandler->appSettings().thumbnailsQuality(); }
 
-    void Settings::setAppTheme( QString const & app_theme ){ m_projectFileHandler->appSettings().setAppTheme( app_theme ); }
+    void ProjectSettings::setAppTheme( QString const & app_theme ){ m_projectFileHandler->appSettings().setAppTheme( app_theme ); }
 
-    QString Settings::appTheme() { return m_projectFileHandler->appSettings().appTheme(); }
+    QString ProjectSettings::appTheme() { return m_projectFileHandler->appSettings().appTheme(); }
 
-    void Settings::setSafeSearch( QString const & safe_search )
+    void ProjectSettings::setSafeSearch( QString const & safe_search )
     {
         if( safe_search != m_projectFileHandler->appSettings().safeSearch() ){
             m_projectFileHandler->appSettings().setSafeSearch( safe_search );
@@ -46,7 +46,7 @@ namespace Purple
     }
 
 
-    void Settings::setThumbnailsQuality( QString const & thumbnails_quality )
+    void ProjectSettings::setThumbnailsQuality( QString const & thumbnails_quality )
     {
         if( thumbnails_quality != m_projectFileHandler->appSettings().thumbnailsQuality() ){
             m_projectFileHandler->appSettings().setThumbnailsQuality( thumbnails_quality );
@@ -54,7 +54,7 @@ namespace Purple
         }
     }
 
-    void Settings::settings()
+    void ProjectSettings::settings()
     {
         bb::data::JsonDataAccess jda;
         QVariant keyMap = jda.load( "asset:///project_file.json" );

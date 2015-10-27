@@ -1,6 +1,8 @@
 import bb.cascades 1.0
 import bb.system 1.0
 import bb.data 1.0
+import purple.network 1.0
+import purple.settings 1.0
 
 TabbedPane {
     id: root
@@ -8,13 +10,22 @@ TabbedPane {
     Menu.definition: MenuDefinition {
         settingsAction: SettingsActionItem {
             onTriggered: {
-                settingsSheet.open()
+                settingsSheet.open();
             }
         }
     }
     attachedObjects: [
-        MySettings {
+        CppSettings {
+            id: cpptool_settings
         },
+        CppNetworkManager {
+            id: cpptool_network
+        },
+        ActivityIndicator {
+            id: loadingIndicator
+            running: false
+        },
+
         SystemDialog {
             id: errorDialog
             title: "Error"
@@ -22,19 +33,12 @@ TabbedPane {
         },
         Sheet {
             id: settingsSheet
-            Page {
-                id: settingsPage
-                titleBar: TitleBar {
-                    title: "Settings"
-                }
-                MySettings {
-                    onAppThemeChanged: {
-//                        appTheme = _tools.appSettings.appTheme
+            NavigationPane {
+                Page { 
+                    titleBar: TitleBar {
+                        title: "Settings"
                     }
-                    onMaxResultsChanged: {
-//                        maxResults = _tools.appSettings.maxResult
-                    }
-                }
+                    MySettings {} }
             }
         }
     ]
@@ -42,25 +46,26 @@ TabbedPane {
         id: homeTab
         title: "Home"
         imageSource: "asset:///ad_search.png"
-        
-        function searchResultObtained( result )
-        {
-            myResult.setText( result )
+
+        function searchResultObtained(result) {
+            loadingIndicator.running = false
+            myResult.setText(result)
         }
-        
-        function errorGotten( error )
-        {
+
+        function errorGotten(error) {
             errorDialog.body = error
             errorDialog.show()
         }
 
-        function processRequest( query )
-        {
-            var m_url = _tools.appSettings.youtubeUrl
-            console.log( m_url )
-            m_url = m_url + "&q=" + _tools.networkManager.toPercentage( query );
-            m_url = m_url + "&maxResults=" + _tools.networkManager.maxResults
-            m_url = m_url + "&key=" + _tools.networkManager.apiKey;
+        function processRequest(query) {
+            loadingIndicator.running = true
+            var m_url = cpptool_settings.youtubeUrl
+            console.log( m_url );
+            m_url = m_url + "&q=" + cpptool_network.toPercentageEncoding(query)
+            m_url = m_url + "&maxResults=" + cpptool_settings.maxResult
+            m_url = m_url + "&key=" + cpptool_settings.apiKey;
+            
+            cpptool_network.sendRequest( m_url )
         }
         
         Page {
@@ -197,9 +202,9 @@ TabbedPane {
             }
         }
         onCreationCompleted: {
-//            _tools.networkManager.errorOccurred.connect( errorGotten )            
-            _tools.networkManager.finished.connect( searchResultObtained )
-            _tools.networkManager.networkError.connect( errorGotten )
+            cpptool_network.finished.connect( homeTab.searchResultObtained )
+            cpptool_network.errorOccurred.connect( homeTab.errorGotten )
+            cpptool_network.networkError.connect( homeTab.errorGotten )
         }
     }
     

@@ -51,7 +51,7 @@ config_pri_assets {
 config_pri_source_group1 {
     SOURCES += \
         $$quote($$BASEDIR/src/ProjectFile.cpp) \
-        $$quote($$BASEDIR/src/Settings.cpp) \
+        $$quote($$BASEDIR/src/ProjectSettings.cpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.cpp) \
         $$quote($$BASEDIR/src/applicationui.cpp) \
         $$quote($$BASEDIR/src/main.cpp) \
@@ -59,7 +59,7 @@ config_pri_source_group1 {
 
     HEADERS += \
         $$quote($$BASEDIR/src/ProjectFile.hpp) \
-        $$quote($$BASEDIR/src/Settings.hpp) \
+        $$quote($$BASEDIR/src/ProjectSettings.hpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.hpp) \
         $$quote($$BASEDIR/src/applicationui.hpp) \
         $$quote($$BASEDIR/src/result.hpp)

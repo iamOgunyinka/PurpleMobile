@@ -8,15 +8,6 @@ Container {
     property int     maxResults;
     property string  safeSearch;
     
-    attachedObjects: [
-        ActionItem {
-            title: "Back"
-            onTriggered: {
-            
-            }
-            ActionBar.placement: ActionBarPlacement.OnBar
-        }    
-    ]
     DropDown {
         id: appThemeOption
         title: "Theme"

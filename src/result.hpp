@@ -1,10 +1,3 @@
-/*
- * result.hpp
- *
- *  Created on: Oct 25, 2015
- *      Author: Joshua
- */
-
 #ifndef RESULT_HPP_
 #define RESULT_HPP_
 

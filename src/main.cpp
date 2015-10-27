@@ -24,21 +24,16 @@
 #include <Qt/qdeclarativedebug.h>
 
 using namespace bb::cascades;
-using Purple::Settings;
-using Purple::SyncNetworkManager;
+
 using Purple::ApplicationUI;
 
-
-Q_DECL_EXPORT int main(int argc, char **argv)
+Q_DECL_EXPORT int main( int argc, char **argv )
 {
     Application app(argc, argv);
 
-    qRegisterMetaType<Settings*>( "Settings*" );
-    qRegisterMetaType<SyncNetworkManager*>( "SyncNetworkManager*" );
     // Create the Application UI object, this is where the main.qml file
     // is loaded and the application scene is set.
     ApplicationUI appui;
-
 
     return Application::exec();
 }

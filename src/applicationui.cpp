@@ -4,18 +4,16 @@
 #include <bb/cascades/QmlDocument>
 #include <bb/cascades/AbstractPane>
 #include <bb/cascades/LocaleHandler>
-#include <src/Settings.hpp>
+#include <src/ProjectSettings.hpp>
 #include <src/SyncNetworkManager.hpp>
 
 using namespace bb::cascades;
-using namespace Purple;
+using Purple::ApplicationUI;
 
 ApplicationUI::ApplicationUI() :
         QObject(),
         m_pTranslator( new QTranslator(this)),
-        m_pLocaleHandler( new LocaleHandler(this) ),
-        m_networkManager( new SyncNetworkManager( this ) ),
-        m_appSettings( new Settings( this ))
+        m_pLocaleHandler( new LocaleHandler(this) )
 {
     bool res = QObject::connect(m_pLocaleHandler, SIGNAL(systemLanguageChanged()), this, SLOT(onSystemLanguageChanged()));
     // This is only available in Debug builds
@@ -29,16 +27,12 @@ ApplicationUI::ApplicationUI() :
 
     // Create scene document from main.qml asset, the parent is set
     // to ensure the document gets destroyed properly at shut down.
-
-//    qmlRegisterType<Settings>( "purple.settings", 1, 0, "Settings" );
-//    qmlRegisterType<SyncNetworkManager>( "purple.network", 1, 0, "Network" );
+    qmlRegisterType<Purple::ProjectSettings>( "purple.settings", 1, 0, "CppSettings" );
+    qmlRegisterType<Purple::SyncNetworkManager>( "purple.network", 1, 0, "CppNetworkManager" );
 
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
-    qml->documentContext()->setContextProperty( "_tools", this );
-
     // Create root object for the UI
     AbstractPane *root = qml->createRootObject<AbstractPane>();
-
     // Set created root object as the application scene
     Application::instance()->setScene(root);
 }
@@ -53,6 +47,3 @@ void ApplicationUI::onSystemLanguageChanged()
         QCoreApplication::instance()->installTranslator(m_pTranslator);
     }
 }
-
-SyncNetworkManager* ApplicationUI::networkManager() { return m_networkManager; }
-Settings          * ApplicationUI::appSettings() { return m_appSettings; }
