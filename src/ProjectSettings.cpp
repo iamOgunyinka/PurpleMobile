@@ -15,7 +15,7 @@ namespace Purple
             QObject( parent ),
             m_projectFileHandler( new Purple::ProjectFile )
     {
-        settings();
+        setProjectFile( "asset:///project_file.json" );
     }
 
     ProjectSettings::~ProjectSettings()
@@ -54,23 +54,20 @@ namespace Purple
         }
     }
 
-    void ProjectSettings::settings()
+    void ProjectSettings::setProjectFile( QString const & location )
     {
         bb::data::JsonDataAccess jda;
-        QVariant keyMap = jda.load( "asset:///project_file.json" );
+        QVariantMap keyMap = jda.load( location ).toMap();
 
         if( jda.hasError() ){
             emit errorOccurred( "Unable to load API Key from current location" );
         } else {
-            QVariantMap api_info = keyMap.toMap()["api_info"].toMap();
-            m_projectFileHandler->apiInfo().setApiKey( api_info["apiKey"].toString() );
-            m_projectFileHandler->apiInfo().setMaxResults( api_info["maxResults"].toInt() );
-            m_projectFileHandler->apiInfo().setYoutubeUrl( api_info["youtube_url"].toString() );
-
-            QVariantMap app_settings = keyMap.toMap()["settings"].toMap();
-            m_projectFileHandler->appSettings().setAppTheme( app_settings["appTheme"].toString() );
-            m_projectFileHandler->appSettings().setSafeSearch( app_settings["safeSearch"].toString() );
-            m_projectFileHandler->appSettings().setThumbnailsQuality( app_settings["thumbnailsQuality"].toString() );
+            m_projectFileHandler->apiInfo().setApiKey( keyMap["apiKey"].toString() );
+            m_projectFileHandler->apiInfo().setMaxResults( keyMap["maxResults"].toInt() );
+            m_projectFileHandler->apiInfo().setYoutubeUrl( keyMap["youtube_url"].toString() );
+            m_projectFileHandler->appSettings().setAppTheme( keyMap["appTheme"].toString() );
+            m_projectFileHandler->appSettings().setSafeSearch( keyMap["safeSearch"].toString() );
+            m_projectFileHandler->appSettings().setThumbnailsQuality( keyMap["thumbnailsQuality"].toString() );
         }
     }
 } /* namespace Purple */

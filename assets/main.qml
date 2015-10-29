@@ -25,7 +25,7 @@ TabbedPane {
             id: loadingIndicator
             running: false
         },
-
+        
         SystemDialog {
             id: errorDialog
             title: "Error"
@@ -33,12 +33,20 @@ TabbedPane {
         },
         Sheet {
             id: settingsSheet
-            NavigationPane {
-                Page { 
-                    titleBar: TitleBar {
-                        title: "Settings"
+            Page { 
+                titleBar: TitleBar {
+                    title: "Settings"
+                }
+                content: MySettings {} 
+                actions: [
+                    ActionItem {
+                        title: "Close"
+                        ActionBar.placement: ActionBarPlacement.OnBar
+                        onTriggered: {
+                            settingsSheet.close()
+                        }
                     }
-                    MySettings {} }
+                ]
             }
         }
     ]
@@ -46,26 +54,59 @@ TabbedPane {
         id: homeTab
         title: "Home"
         imageSource: "asset:///ad_search.png"
-
+        
         function searchResultObtained(result) {
             loadingIndicator.running = false
+            loadingIndicator.stop()
             myResult.setText(result)
+            resultDropDown.visible = true
         }
-
+        
         function errorGotten(error) {
+            loadingIndicator.stop()
             errorDialog.body = error
             errorDialog.show()
         }
-
-        function processRequest(query) {
+        
+        function download( _url )
+        {
+            console.log( "URL is ", _url );
+            cpptool_network.sendRequest( _url );
+        }
+        
+        function processRequest(query)
+        {
             loadingIndicator.running = true
-            var m_url = cpptool_settings.youtubeUrl
-            console.log( m_url );
-            m_url = m_url + "&q=" + cpptool_network.toPercentageEncoding(query)
-            m_url = m_url + "&maxResults=" + cpptool_settings.maxResult
-            m_url = m_url + "&key=" + cpptool_settings.apiKey;
+            cpptool_settings.setProjectFile( "asset:///project_file.json" )
+            loadingIndicator.start()
+            var m_url = cpptool_settings.youtubeUrl()
             
-            cpptool_network.sendRequest( m_url )
+            m_url = m_url + "&q=" + cpptool_network.toPercentageEncoding(query)
+            m_url = m_url + "&maxResults=" + cpptool_settings.maxResult()
+            m_url = m_url + "&key=" + cpptool_settings.apiKey();
+            
+            download( m_url )
+        }
+        
+        function processSearchOrDownload( searchText )
+        {
+            resultDropDown.visible = false
+            myResult.setText("")
+            if( searchText.text.valueOf() == "".valueOf() ) return;
+            
+            switch ( segmentedHomePage.selectedIndex ){
+                case 0: case 1:
+                    {
+                        processRequest( searchText )
+                        break;
+                    }
+                case 2:
+                    {
+                        download( searchText )
+                        break;
+                    }
+                default : break;
+            }
         }
         
         Page {
@@ -101,26 +142,29 @@ TabbedPane {
                 SegmentedControl {
                     id: segmentedHomePage
                     options: [ 
-                        simple_search_option, 
-                        advanced_search_option,
-                        direct_url_option
-                        ]
+                    simple_search_option, 
+                    advanced_search_option,
+                    direct_url_option
+                    ]
                     onSelectedOptionChanged: {
                         var value = segmentedHomePage.selectedIndex
                         switch ( value )
                         {
                             case 0:
                                 {
+                                    searchButton.imageSource = "asset:///search.png"
                                     txtSearch.setHintText( "Search Video, Channels or Playlists" )
                                     break;
                                 }
                             case 1:
                                 {
+                                    searchButton.imageSource = "asset:///ad_search.png"
                                     txtSearch.setHintText( "Enter youtube URL" )
                                     break;
                                 }
                             case 2:
                                 {
+                                    searchButton.imageSource = "asset:///download.png"
                                     txtSearch.setHintText( "Enter URL for any website" )
                                     break;
                                 }
@@ -137,63 +181,56 @@ TabbedPane {
                     layout: StackLayout {
                         orientation: LayoutOrientation.LeftToRight
                     }
-                    
+                    attachedObjects: [
+                        DropDown {
+                            id: resultDropDown
+                            title: "In results, show only"
+                            options: [
+                                Option {
+                                    text: "Videos"
+                                    value: "youtube#video"
+                                },
+                                Option {
+                                    text: "Channels"
+                                    value: "youtube#channels"
+                                },
+                                Option {
+                                    text: "Playlist"
+                                    value: "youtube#channels"
+                                }
+                            ]
+                            onSelectedOptionChanged: {
+                                var options = selectedOption.value
+                                switch ( selectedIndex )
+                                {
+                                    case "youtube#video": break;
+                                    case "youtube#channels": break;
+                                    case "youtube#playlist": break;
+                                    default: break;
+                                }
+                            }
+                        }
+                    ]                    
                     TextField {
                         id: txtSearch
                         input {
                             submitKey: SubmitKey.Search
                             onSubmitted: {
-                                myResult.setText("")
-                                if( txtSearch.text.valueOf() == "".valueOf() ){
-                                    myResult.setText( "Empty Search" )
-                                } else {
-                                    homeTab.processRequest( txtSearch.text )
-                                }
+                                homeTab.processSearchOrDownload( txtSearch.text )
                             }
                         }
                     }
                     
                     Button {
+                        id: searchButton
                         imageSource: "asset:///search.png"
                         maxWidth: 1
                         onClicked: {
-                            myResult.setText("")
-                            if( txtSearch.text.valueOf() == "".valueOf() ){
-                                myResult.setText( "Empty Search" )
-                            } else {
-                                homeTab.processRequest( txtSearch.text )
-                            }
+                            homeTab.processSearchOrDownload( txtSearch.text );
                         }
                     }
                 }
                 
-                DropDown {
-                    title: "In results, show only"
-                    options: [
-                        Option {
-                            text: "Videos"
-                            value: "youtube#video"
-                        },
-                        Option {
-                            text: "Channels"
-                            value: "youtube#channels"
-                        },
-                        Option {
-                            text: "Playlist"
-                            value: "youtube#channels"
-                        }
-                    ]
-                    onSelectedOptionChanged: {
-                        var options = selectedOption.value
-                        switch ( selectedIndex )
-                        {
-                            case "youtube#video": break;
-                            case "youtube#channels": break;
-                            case "youtube#playlist": break;
-                            default: break;
-                        }
-                    }
-                }
                 ScrollView {
                     Label {
                         id: myResult
@@ -203,8 +240,9 @@ TabbedPane {
         }
         onCreationCompleted: {
             cpptool_network.finished.connect( homeTab.searchResultObtained )
-            cpptool_network.errorOccurred.connect( homeTab.errorGotten )
             cpptool_network.networkError.connect( homeTab.errorGotten )
+            cpptool_network.errorOccurred.connect( homeTab.errorGotten )
+            cpptool_settings.errorOccurred.connect( homeTab.errorGotten )
         }
     }
     
@@ -212,34 +250,6 @@ TabbedPane {
         id: downloadsTab
         title: "Downloads"
         imageSource: "asset:///download.png"
-        Page {
-            titleBar: TitleBar {
-                kind: TitleBarKind.Segmented
-                options: [
-                    Option {
-                        text: "In Progress"
-                        value: 0
-                    },
-                    Option {
-                        text: "Stopped"
-                        value: 1
-                    },
-                    Option {
-                        text: "Completed"
-                        value: 2
-                    }
-                ]
-                id: downloadsTitleBar
-                title: "Downloads"
-            }
-            id: downloadPageTab
-            Container {
-                ListView {
-                    dataModel: XmlDataModel {
-                        //source: "asset:///project_file.json"
-                    }
-                }
-            }
-        }
+        content: DownloadManager {}
     }
 }

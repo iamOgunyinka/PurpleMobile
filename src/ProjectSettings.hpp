@@ -25,9 +25,9 @@ namespace Purple
         ProjectSettings( QObject *parent = 0 );
         virtual ~ProjectSettings();
 
-        QString apiKey();
-        QString youtubeUrl();
-        int maxResult();
+        Q_INVOKABLE QString apiKey();
+        Q_INVOKABLE QString youtubeUrl();
+        Q_INVOKABLE int maxResult();
 
         Q_INVOKABLE QString appTheme();
         Q_INVOKABLE void setAppTheme( QString const & theme );
@@ -37,13 +37,14 @@ namespace Purple
 
         Q_INVOKABLE QString thumbnailsQuality();
         Q_INVOKABLE void setThumbnailsQuality( QString const & thumbnails_quality );
+
+        Q_INVOKABLE void setProjectFile( QString const & location );
     signals:
         void errorOccurred( QString const & error );
         void thumbnailsQualityChanged( QString const & newThumbnailsQuality );
         void safeSearchChanged( QString const & newSafeSearch );
     private:
         Purple::ProjectFile         *m_projectFileHandler;
-        void    settings();
     };
 
 } /* namespace Purple */

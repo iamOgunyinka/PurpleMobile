@@ -36,16 +36,19 @@ simulator {
 
 config_pri_assets {
     OTHER_FILES += \
+        $$quote($$BASEDIR/assets/DownloadManager.qml) \
         $$quote($$BASEDIR/assets/MySettings.qml) \
         $$quote($$BASEDIR/assets/ad_search.png) \
         $$quote($$BASEDIR/assets/download.png) \
+        $$quote($$BASEDIR/assets/download_queue.xml) \
         $$quote($$BASEDIR/assets/exit.png) \
         $$quote($$BASEDIR/assets/logo.png) \
         $$quote($$BASEDIR/assets/main.qml) \
         $$quote($$BASEDIR/assets/project_file.json) \
         $$quote($$BASEDIR/assets/property.png) \
         $$quote($$BASEDIR/assets/refresh.png) \
-        $$quote($$BASEDIR/assets/search.png)
+        $$quote($$BASEDIR/assets/search.png) \
+        $$quote($$BASEDIR/assets/video.png)
 }
 
 config_pri_source_group1 {
