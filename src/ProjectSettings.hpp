@@ -45,6 +45,7 @@ namespace Purple
         void safeSearchChanged( QString const & newSafeSearch );
     private:
         Purple::ProjectFile         *m_projectFileHandler;
+        static QString              projectSettingsFilename;
     };
 
 } /* namespace Purple */

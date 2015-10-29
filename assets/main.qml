@@ -58,8 +58,9 @@ TabbedPane {
         function searchResultObtained(result) {
             loadingIndicator.running = false
             loadingIndicator.stop()
-            myResult.setText(result)
             resultDropDown.visible = true
+            
+            errorDialog.body = result
         }
         
         function errorGotten(error) {
@@ -70,20 +71,20 @@ TabbedPane {
         
         function download( _url )
         {
-            console.log( "URL is ", _url );
             cpptool_network.sendRequest( _url );
         }
         
         function processRequest(query)
         {
             loadingIndicator.running = true
-            cpptool_settings.setProjectFile( "asset:///project_file.json" )
             loadingIndicator.start()
-            var m_url = cpptool_settings.youtubeUrl()
+            
+            cpptool_settings.setProjectFile( dirPath.settings );
+            var m_url = "https://www.googleapis.com/youtube/v3/search/?part=snippet"
             
             m_url = m_url + "&q=" + cpptool_network.toPercentageEncoding(query)
-            m_url = m_url + "&maxResults=" + cpptool_settings.maxResult()
-            m_url = m_url + "&key=" + cpptool_settings.apiKey();
+            m_url = m_url + "&maxResults=" + cpptool_settings.maxResult
+            m_url = m_url + "&key=AIzaSyBhl_zBnEEv_xiIukkMpz8ayoiwT1UdfQk"
             
             download( m_url )
         }
@@ -92,7 +93,7 @@ TabbedPane {
         {
             resultDropDown.visible = false
             myResult.setText("")
-            if( searchText.text.valueOf() == "".valueOf() ) return;
+            if( searchText.valueOf() == "".valueOf() ) return;
             
             switch ( segmentedHomePage.selectedIndex ){
                 case 0: case 1:

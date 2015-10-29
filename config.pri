@@ -44,7 +44,6 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/exit.png) \
         $$quote($$BASEDIR/assets/logo.png) \
         $$quote($$BASEDIR/assets/main.qml) \
-        $$quote($$BASEDIR/assets/project_file.json) \
         $$quote($$BASEDIR/assets/property.png) \
         $$quote($$BASEDIR/assets/refresh.png) \
         $$quote($$BASEDIR/assets/search.png) \
@@ -53,6 +52,7 @@ config_pri_assets {
 
 config_pri_source_group1 {
     SOURCES += \
+        $$quote($$BASEDIR/src/DownloadManager.cpp) \
         $$quote($$BASEDIR/src/ProjectFile.cpp) \
         $$quote($$BASEDIR/src/ProjectSettings.cpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.cpp) \
@@ -61,6 +61,8 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/result.cpp)
 
     HEADERS += \
+        $$quote($$BASEDIR/src/DownloadInterface.hpp) \
+        $$quote($$BASEDIR/src/DownloadManager.hpp) \
         $$quote($$BASEDIR/src/ProjectFile.hpp) \
         $$quote($$BASEDIR/src/ProjectSettings.hpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.hpp) \

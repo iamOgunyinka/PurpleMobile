@@ -1,5 +1,7 @@
 #include "applicationui.hpp"
 
+#include <QDir>
+#include <QTextStream>
 #include <bb/cascades/Application>
 #include <bb/cascades/QmlDocument>
 #include <bb/cascades/AbstractPane>
@@ -31,6 +33,12 @@ ApplicationUI::ApplicationUI() :
     qmlRegisterType<Purple::SyncNetworkManager>( "purple.network", 1, 0, "CppNetworkManager" );
 
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
+
+    QDeclarativePropertyMap *map = new QDeclarativePropertyMap;
+    QString workDir = QDir::currentPath() + writeSettingsFile();
+    map->insert( "settings", QVariant( QString( "file://" + workDir )));
+    qml->setContextProperty( "dirPath", map );
+
     // Create root object for the UI
     AbstractPane *root = qml->createRootObject<AbstractPane>();
     // Set created root object as the application scene
@@ -46,4 +54,32 @@ void ApplicationUI::onSystemLanguageChanged()
     if (m_pTranslator->load(file_name, "app/native/qm")) {
         QCoreApplication::instance()->installTranslator(m_pTranslator);
     }
+}
+
+QString ApplicationUI::writeSettingsFile()
+{
+    QDir dir;
+
+    QString path = "/data/files/settings/";
+    dir.mkdir(path);
+
+    path.append( "settings.json" );
+    QFile textFile( path );
+    if( !textFile.exists() )
+    {
+        textFile.open( QIODevice::WriteOnly | QIODevice::Text );
+        QTextStream out( &textFile );
+
+        out << "[\n << {\n"
+                << "\"apiKey\": \"AIzaSyBhl_zBnEEv_xiIukkMpz8ayoiwT1UdfQk\",\n"
+                << "\"maxResult\": 40,\n"
+                << "\"youtube_url\": \"https://www.googleapis.com/youtube/v3/search/?part=snippet\",\n"
+                << "\"appTheme\": \"light\",\n"
+                << "\"safeSearch\": \"moderate\",\n"
+                << "\"thumbnailsQuality\": \"default\"\n"
+                << "}\n" << "]\n";
+        textFile.close();
+        qDebug() << "Settings written successfully";
+    }
+    return path;
 }

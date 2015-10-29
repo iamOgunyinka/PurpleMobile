@@ -15,8 +15,8 @@ namespace Purple
             QObject( parent ),
             m_projectFileHandler( new Purple::ProjectFile )
     {
-        setProjectFile( "asset:///project_file.json" );
     }
+    QString ProjectSettings::projectSettingsFilename = "";
 
     ProjectSettings::~ProjectSettings()
     {
@@ -57,11 +57,15 @@ namespace Purple
     void ProjectSettings::setProjectFile( QString const & location )
     {
         bb::data::JsonDataAccess jda;
-        QVariantMap keyMap = jda.load( location ).toMap();
+        qDebug() << location;
+        ProjectSettings::projectSettingsFilename = location;
+
+        QVariantList keyList = jda.load( location ).toList();
 
         if( jda.hasError() ){
-            emit errorOccurred( "Unable to load API Key from current location" );
+            emit errorOccurred( jda.error().errorMessage() );
         } else {
+            QVariantMap keyMap = keyList[0].toMap();
             m_projectFileHandler->apiInfo().setApiKey( keyMap["apiKey"].toString() );
             m_projectFileHandler->apiInfo().setMaxResults( keyMap["maxResults"].toInt() );
             m_projectFileHandler->apiInfo().setYoutubeUrl( keyMap["youtube_url"].toString() );

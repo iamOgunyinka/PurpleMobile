@@ -27,6 +27,8 @@ namespace Purple {
     private:
         QTranslator* m_pTranslator;
         bb::cascades::LocaleHandler* m_pLocaleHandler;
+
+        QString writeSettingsFile();
     };
 }
 #endif /* ApplicationUI_HPP_ */
