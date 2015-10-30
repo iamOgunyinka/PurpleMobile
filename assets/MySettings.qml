@@ -3,37 +3,26 @@ import bb.cascades 1.0
 Container {
     property string  thumbnailsQuality;
     property string  appTheme;
-    property string  youtubeUrl;
-    property string  apiKey;
     property int     maxResults;
     property string  safeSearch;
+    property string  fileExists;
     
+    topPadding: 30
+    leftPadding: 30
+    rightPadding: 30
     DropDown {
         id: appThemeOption
         title: "Theme"
         options: [
             Option {
                 text: "Light"
-                value: 0
             },
             Option {
                 text: "Dark"
-                value: 1
             }
         ]
-        onSelectedIndexChanged: {
-            switch ( selectedIndex ){
-                case 0:{
-                        appTheme = "Dark"
-                        break;
-                }
-            case 1: {
-                    appTheme = "Light"
-                    break;
-            }
-        default :
-            break;
-            }
+        onSelectedOptionChanged: {
+            appTheme = selectedOption.text
         }
         onCreationCompleted: {
             appThemeOption.setSelectedIndex( 0 )
@@ -47,33 +36,39 @@ Container {
         options: [
             Option {
                 text: "None"
-                value: "none"
             },
             Option {
                 text: "Moderate"
-                value: "moderate"
             },
             Option {
                 text: "Strict"
-                value: "strict"
             }
         ]
+        onCreationCompleted: {
+            safeSearchOption.setSelectedIndex(0)
+        }
+        onSelectedOptionChanged: {
+            safeSearch = selectedOption.text
+        }
     }
     DropDown {
         id: thumbnailsQualityOption            
         title: "Thumbnails Quality"
+        onSelectedOptionChanged: {
+            thumbnailsQuality = selectedOption.text
+        }
+        onCreationCompleted: {
+            thumbnailsQualityOption.setSelectedIndex(0)
+        }
         options: [
             Option {
                 text: "Default"
-                value: "default"
             },
             Option {
                 text: "Medium"
-                value: "medium"
             },
             Option {
                 text: "High"
-                value: "high"
             }
         ]
     }
@@ -86,9 +81,37 @@ Container {
         Slider {
             fromValue: 5
             toValue: 50
+            value: 20
             onValueChanged: {
                 maximumResultsLabel.text = "Results per search: " + Math.round( value )
                 maxResults = Math.round( value )
+            }
+        }
+    }
+    Divider {}
+    
+    Container {
+        Label {
+            text: "If file already exist"
+        }
+        DropDown {
+            id: fileExistsOption
+            options: [
+                Option {
+                    text: "Cancel"
+                },
+                Option {
+                    text: "Overwrite"
+                },
+                Option {
+                    text: "Rename"
+                }
+            ]
+            onCreationCompleted: {
+                fileExistsOption.setSelectedIndex(1)
+            }
+            onSelectedOptionChanged: {
+                fileExists = selectedOption.text                
             }
         }
     }

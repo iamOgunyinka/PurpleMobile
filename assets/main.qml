@@ -43,6 +43,7 @@ TabbedPane {
                         title: "Close"
                         ActionBar.placement: ActionBarPlacement.OnBar
                         onTriggered: {
+                            //TODO --> Write new settings to file
                             settingsSheet.close()
                         }
                     }
@@ -79,7 +80,7 @@ TabbedPane {
             loadingIndicator.running = true
             loadingIndicator.start()
             
-            cpptool_settings.setProjectFile( dirPath.settings );
+//            cpptool_settings.setProjectFile( dirPath.settings );
             var m_url = "https://www.googleapis.com/youtube/v3/search/?part=snippet"
             
             m_url = m_url + "&q=" + cpptool_network.toPercentageEncoding(query)
@@ -103,7 +104,7 @@ TabbedPane {
                     }
                 case 2:
                     {
-                        download( searchText )
+                        mainDownloadManager.startNewDownload( searchText )
                         break;
                     }
                 default : break;
@@ -140,6 +141,7 @@ TabbedPane {
                 }
             ]
             Container {
+                topPadding: 20
                 SegmentedControl {
                     id: segmentedHomePage
                     options: [ 
@@ -182,6 +184,8 @@ TabbedPane {
                     layout: StackLayout {
                         orientation: LayoutOrientation.LeftToRight
                     }
+                    leftPadding: 20
+                    rightPadding: 20
                     attachedObjects: [
                         DropDown {
                             id: resultDropDown
@@ -211,7 +215,7 @@ TabbedPane {
                                 }
                             }
                         }
-                    ]                    
+                    ]
                     TextField {
                         id: txtSearch
                         input {
@@ -251,6 +255,8 @@ TabbedPane {
         id: downloadsTab
         title: "Downloads"
         imageSource: "asset:///download.png"
-        content: DownloadManager {}
+        content: DownloadManager {
+            id: mainDownloadManager
+        }
     }
 }

@@ -1,6 +1,7 @@
 import bb.cascades 1.2
 import bb.data 1.0
-import bb.network 1.0
+import purple.downloadManager 1.0
+import bb.system 1.2
 
 Page {
     id: downloadPageTab
@@ -26,11 +27,11 @@ Page {
             {
                 case 0: break;
                 case 1:{
-                        showCompletedDownloads(); 
+                        downloadPageTab.showCompletedDownloads(); 
                         break;
                 }
             case 2:{
-                    showStoppedDownloads();
+                    downloadPageTab.showStoppedDownloads();
                     break;
             }
             }
@@ -40,20 +41,52 @@ Page {
     }
     
     Container {
-        ListView {
-            dataModel: XmlDataModel{
-                source: "asset:///download_queue.xml"
+        topPadding: 20
+        signal finished();
+        
+        attachedObjects: [
+            DataSource {
+                id: dataSource
+                source: "asset:///download_queue.json"
+                onDataLoaded: {
+                    for( var i = 0; i != data.length; ++i ){
+                        arrayDataModel.append( data[i] );
+                    }
+                }
+            },
+            CppDownloadManager {
+                id: myDownloadManager
+            },
+            SystemToast {
+                id: systemToast
             }
+        ]
+        onCreationCompleted: {
+            dataSource.load()
+        }
+        
+        ListView {
+            dataModel: ArrayDataModel {
+                id: arrayDataModel
+            }
+            
             listItemComponents: [
                 ListItemComponent {
-                    type: "category"
-                    Header {
-                        title: ListItemData.value
-                    }
-                },
-                ListItemComponent {
-                    type: "download"
+                    id: listItem
+                    type: ""
                     CustomListItem {
+                        contextActions: [
+                            ActionSet {
+                                DeleteActionItem {
+                                    onTriggered: {
+                                        var myView = listItem.ListItem.view
+                                        var dataModel = myView.dataModel
+                                        var indexPath = myView.selected()
+                                        dataModel.removeItem( indexPath )
+                                    }
+                                }
+                            }
+                        ]
                         Container {
                             layout: StackLayout {
                                 orientation: LayoutOrientation.LeftToRight
@@ -62,7 +95,7 @@ Page {
                                 layoutProperties: StackLayoutProperties {
                                     spaceQuota: 1/6
                                 }
-                                imageSource: ListItemData.thumbnails
+                                imageSource: ListItemData.thumbnail
                                 scalingMethod: ScalingMethod.AspectFit
                             }
                             Container {
@@ -76,14 +109,23 @@ Page {
                                     text: ListItemData.title
                                 }
                                 ProgressIndicator {
+                                    id: progressIndicator
                                     fromValue: 1
                                     toValue: 100
                                     value: 5
-                                    onValueChanged: {
-                                        if( Math.round(value) == 100 ){
-                                            visible = false
-                                        }
+                                }
+                                Label {
+                                    id: downloadStatus
+                                    textStyle {
+                                        fontStyle: FontStyle.Italic   
+                                        fontSize: FontSize.XSmall
+                                        color: Color.Blue
                                     }
+                                }
+                                Label {
+                                    id: urlKeeper
+                                    visible: false
+                                    text: ListItemData.url
                                 }
                             }
                         }
@@ -91,16 +133,51 @@ Page {
                 }
             ]
         }
-        // free functions
-        
-        function showCompletedDownloads()
-        {
-            //
+    }
+    onCreationCompleted: {
+        myDownloadManager.status.connect( downloadPageTab.status )
+        myDownloadManager.progress.connect( downloadPageTab.progress )
+        myDownloadManager.finished.connect( downloadPageTab.finished )
+    }
+    
+    function finished(url, destination)
+    {
+        systemToast.body = "Download Completed"
+    }
+    
+    function progress( url, actualReceived, actualTotal, percent, speed, unit )
+    {
+        progressIndicator.value = percent
+        downloadStatus.text = "Downloaded " + actualReceived + " of " + actualTotal
+    
+    }
+    
+    //TODO
+    function status( url, title, status, data )
+    {
+        if( title == "Download started" ){
+            
+        } else if( title == "Error" ) {
+            
+        } else if( title == "Cancel" ) {
+            
+        } else { //Complete Download
+            
         }
-        
-        function showStoppedDownloads()
-        {
-            //
-        }
+    }
+    
+    function startNewDownload( url )
+    {
+        myDownloadManager.startDownload( url );
+    }
+    
+    function showCompletedDownloads()
+    {
+        //
+    }
+    
+    function showStoppedDownloads()
+    {
+        //
     }
 }

@@ -37,10 +37,11 @@ simulator {
 config_pri_assets {
     OTHER_FILES += \
         $$quote($$BASEDIR/assets/DownloadManager.qml) \
+        $$quote($$BASEDIR/assets/MyDownloadManager.qml) \
         $$quote($$BASEDIR/assets/MySettings.qml) \
         $$quote($$BASEDIR/assets/ad_search.png) \
         $$quote($$BASEDIR/assets/download.png) \
-        $$quote($$BASEDIR/assets/download_queue.xml) \
+        $$quote($$BASEDIR/assets/download_queue.json) \
         $$quote($$BASEDIR/assets/exit.png) \
         $$quote($$BASEDIR/assets/logo.png) \
         $$quote($$BASEDIR/assets/main.qml) \
@@ -61,7 +62,6 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/result.cpp)
 
     HEADERS += \
-        $$quote($$BASEDIR/src/DownloadInterface.hpp) \
         $$quote($$BASEDIR/src/DownloadManager.hpp) \
         $$quote($$BASEDIR/src/ProjectFile.hpp) \
         $$quote($$BASEDIR/src/ProjectSettings.hpp) \

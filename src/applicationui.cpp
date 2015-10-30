@@ -8,6 +8,7 @@
 #include <bb/cascades/LocaleHandler>
 #include <src/ProjectSettings.hpp>
 #include <src/SyncNetworkManager.hpp>
+#include <src/DownloadManager.hpp>
 
 using namespace bb::cascades;
 using Purple::ApplicationUI;
@@ -26,17 +27,19 @@ ApplicationUI::ApplicationUI() :
 
     // initial load
     onSystemLanguageChanged();
+    writeSettingsFile();
 
     // Create scene document from main.qml asset, the parent is set
     // to ensure the document gets destroyed properly at shut down.
     qmlRegisterType<Purple::ProjectSettings>( "purple.settings", 1, 0, "CppSettings" );
     qmlRegisterType<Purple::SyncNetworkManager>( "purple.network", 1, 0, "CppNetworkManager" );
+    qmlRegisterType<Purple::DownloadManager>( "purple.downloadManager", 1, 0,"CppDownloadManager" );
 
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
 
     QDeclarativePropertyMap *map = new QDeclarativePropertyMap;
-    QString workDir = QDir::currentPath() + writeSettingsFile();
-    map->insert( "settings", QVariant( QString( "file://" + workDir )));
+    QString workDir = QDir::currentPath();
+    map->insert( "settings", QVariant( QString( "file://" + workDir + "/data/files/settings/settings.json" ) ));
     qml->setContextProperty( "dirPath", map );
 
     // Create root object for the UI
@@ -56,30 +59,27 @@ void ApplicationUI::onSystemLanguageChanged()
     }
 }
 
-QString ApplicationUI::writeSettingsFile()
+void ApplicationUI::writeSettingsFile()
 {
     QDir dir;
+    dir.mkpath( "data/files/settings" );
 
-    QString path = "/data/files/settings/";
-    dir.mkdir(path);
-
-    path.append( "settings.json" );
-    QFile textFile( path );
+    QFile textFile( "data/files/settings/settings.json" );
     if( !textFile.exists() )
     {
         textFile.open( QIODevice::WriteOnly | QIODevice::Text );
         QTextStream out( &textFile );
 
-        out << "[\n << {\n"
+        out << "[\n" << "{\n"
                 << "\"apiKey\": \"AIzaSyBhl_zBnEEv_xiIukkMpz8ayoiwT1UdfQk\",\n"
                 << "\"maxResult\": 40,\n"
                 << "\"youtube_url\": \"https://www.googleapis.com/youtube/v3/search/?part=snippet\",\n"
                 << "\"appTheme\": \"light\",\n"
                 << "\"safeSearch\": \"moderate\",\n"
                 << "\"thumbnailsQuality\": \"default\"\n"
+                << "\"existsAction\": \"Overwrite\"\n"
                 << "}\n" << "]\n";
         textFile.close();
         qDebug() << "Settings written successfully";
     }
-    return path;
 }

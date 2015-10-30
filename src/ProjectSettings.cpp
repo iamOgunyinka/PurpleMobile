@@ -58,6 +58,19 @@ namespace Purple
     {
         bb::data::JsonDataAccess jda;
         qDebug() << location;
+
+        QFile file( location );
+        if( file.exists() )
+        {
+            qDebug() << "File exists";
+            file.open( QIODevice::ReadOnly );
+            QTextStream textStream( &file );
+            qDebug() << textStream.readAll();
+            file.close();
+        } else {
+            qDebug() << "Unable to open file";
+        }
+
         ProjectSettings::projectSettingsFilename = location;
 
         QVariantList keyList = jda.load( location ).toList();
