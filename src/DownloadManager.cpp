@@ -39,7 +39,7 @@ namespace Purple
         item.m_tempExists = tempExist;
 
         if ( m_downloadQueue.isEmpty() )
-            QTimer::singleShot(0, this, SLOT(startNextDownload()));
+            QTimer::singleShot( 0, this, SLOT( startNextDownload() ) );
 
         m_downloadQueue.enqueue(item);
     }
@@ -49,9 +49,31 @@ namespace Purple
         stopDownloadImpl( url, false );
     }
 
-    void DownloadManager::stopDownloadImpl( QString const &, bool )
+    void DownloadManager::stopDownloadImpl( QString const & url, bool pause )
     {
+        QNetworkReply *reply = m_urlHash[url];
 
+        if( reply ) {
+            QObject::disconnect( reply, SIGNAL( downloadProgress( qint64, qint64 ) ), this, SLOT( downloadProgress( qint64, qint64 )));
+            QObject::disconnect( reply, SIGNAL( finished() ), this, SLOT( downloadFinished() ));
+            QObject::disconnect( reply, SIGNAL( readyRead() ), this, SLOT( downloadReadyRead() ) );
+            QObject::disconnect( reply, SIGNAL( error( QNetworkReply::NetworkError )), this, SLOT( downloadError( QNetworkReply::NetworkError )));
+
+            Downloads item = m_downloadHash[ reply ];
+            reply->abort();
+            item.m_file->write( reply->readAll() );
+            item.m_file->close();
+
+            if ( !pause ) {
+                QFile::remove( item.m_tempFile );
+            }
+
+            m_downloadHash.remove( reply );
+            m_urlHash.remove( url );
+            startNextDownload();
+
+            reply->deleteLater();
+        }
     }
 
     void DownloadManager::pauseDownload( QString const & url )
@@ -110,7 +132,7 @@ namespace Purple
             QNetworkReply *reply = m_networkManager.get( request );
             QObject::connect( reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress(qint64,qint64) ));
             QObject::connect( reply, SIGNAL( finished() ), this, SLOT( downloadFinished() ) );
-//            QObject::connect( reply, SIGNAL( readyRead() ), this, SLOT( downloadReadyRead() ) );
+            QObject::connect( reply, SIGNAL( readyRead() ), this, SLOT( downloadReadyRead() ) );
             QObject::connect( reply, SIGNAL( error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError) ));
 
             emit status( nextItem.m_url, "Download started", "Download started successfully", nextItem.m_destFile );
@@ -148,14 +170,14 @@ namespace Purple
             emit progress( item.m_url, actualReceived, actualTotal, percent, speed, unit );
         }
     }
-/*
+
     void DownloadManager::downloadReadyRead()
     {
         QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
         Downloads item = m_downloadHash[reply];
         item.m_file->write( reply->readAll() );
     }
-*/
+
     void DownloadManager::downloadFinished()
     {
         QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());

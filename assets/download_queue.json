@@ -1,8 +1,9 @@
 [
 	{
-		"url": "http://",
 		"title": "Qt/C++",
+		"url": "http://",
 		"thumbnail": "asset:///video.png",
-		"status": "completed"
+		"status": "completed",
+		"percentage": 0
 	}
 ]

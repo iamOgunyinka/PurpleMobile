@@ -148,15 +148,16 @@ Page {
     function progress( url, actualReceived, actualTotal, percent, speed, unit )
     {
         progressIndicator.value = percent
-        downloadStatus.text = "Downloaded " + actualReceived + " of " + actualTotal
-    
+        var downloadProgressText = "Downloaded " + actualReceived + " of " + actualTotal
+        console.log( downloadProgressText )
+        downloadStatus.text = downloadProgressText
     }
     
     //TODO
     function status( url, title, status, data )
     {
         if( title == "Download started" ){
-            
+            console.log( "Download Started" );
         } else if( title == "Error" ) {
             
         } else if( title == "Cancel" ) {

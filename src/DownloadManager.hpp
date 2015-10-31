@@ -71,7 +71,7 @@ namespace Purple
     private slots:
         void startNextDownload();
         void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
-//        void downloadReadyRead();
+        void downloadReadyRead();
         void downloadFinished();
         void downloadError(QNetworkReply::NetworkError);
     signals:
