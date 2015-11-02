@@ -1,7 +1,8 @@
 import bb.cascades 1.2
 import bb.data 1.0
-import purple.downloadManager 1.0
 import bb.system 1.2
+import purple.downloadManager 1.0
+import purple.model 1.0
 
 Page {
     id: downloadPageTab
@@ -41,19 +42,11 @@ Page {
     }
     
     Container {
+        id: rootContainer
         topPadding: 20
         signal finished();
         
         attachedObjects: [
-            DataSource {
-                id: dataSource
-                source: "asset:///download_queue.json"
-                onDataLoaded: {
-                    for( var i = 0; i != data.length; ++i ){
-                        arrayDataModel.append( data[i] );
-                    }
-                }
-            },
             CppDownloadManager {
                 id: myDownloadManager
             },
@@ -61,30 +54,58 @@ Page {
                 id: systemToast
             }
         ]
-        onCreationCompleted: {
-            dataSource.load()
-        }
         
         ListView {
-            dataModel: ArrayDataModel {
-                id: arrayDataModel
+            dataModel: CppDataModel {
+                id: dataModel
+                source: "download_queue.json"
             }
             
             listItemComponents: [
                 ListItemComponent {
                     id: listItem
-                    type: ""
+                    type: "all"
                     CustomListItem {
                         contextActions: [
                             ActionSet {
-                                DeleteActionItem {
-                                    onTriggered: {
-                                        var myView = listItem.ListItem.view
-                                        var dataModel = myView.dataModel
-                                        var indexPath = myView.selected()
-                                        dataModel.removeItem( indexPath )
+                                actions: [
+                                    DeleteActionItem {
+                                        onTriggered: {
+                                            var myView = listItem.ListItem.view
+                                            var dataModel = myView.dataModel
+                                            var indexPath = myView.selected()
+                                            dataModel.removeItem( indexPath )
+                                        }
+                                    },
+                                    ActionItem {
+                                        title: "Pause"
+                                        onTriggered: {
+                                            var dataModel = listItem.ListItem.view.dataModel
+                                            var indexPath = listItem.ListItem.view.selected()
+                                            var selectedDownload = dataModel.data( indexPath )
+                                            var m_url = selectedDownload["url"];
+                                            
+                                            if( title == "Pause" ){                                            
+                                                myDownloadManager.pauseDownload( m_url )
+                                                title = "Resume"
+                                            } else {
+                                                myDownloadManager.resumeDownload( m_url )
+                                                title = "Pause"
+                                            }
+                                        }
+                                    },
+                                    ActionItem {
+                                        title: "Stop"
+                                        onTriggered: {
+                                            var dataModel = listItem.ListItem.view.dataModel
+                                            var indexPath = listItem.ListItem.view.selected()
+                                            var selectedDownload = dataModel.data( indexPath )
+                                            var m_url = selectedDownload["url"];
+                                            
+                                            myDownloadManager.startDownload( m_url )
+                                        }
                                     }
-                                }
+                                ]
                             }
                         ]
                         Container {
@@ -159,11 +180,11 @@ Page {
         if( title == "Download started" ){
             console.log( "Download Started" );
         } else if( title == "Error" ) {
-            
+        
         } else if( title == "Cancel" ) {
-            
+        
         } else { //Complete Download
-            
+        
         }
     }
     
@@ -172,9 +193,9 @@ Page {
         myDownloadManager.startDownload( url );
     }
     
+    // TODO
     function showCompletedDownloads()
-    {
-        //
+    {  
     }
     
     function showStoppedDownloads()

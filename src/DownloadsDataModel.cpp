@@ -20,6 +20,7 @@ namespace Purple
     }
 
     QString DownloadsDataModel::source() const { return m_source; }
+
     void DownloadsDataModel::setSource( QString const & newSource ) {
         if( newSource != m_source ){
             m_source = newSource;
@@ -38,10 +39,7 @@ namespace Purple
             return;
         }
         for( int i = 0; i != list.size(); ++i ){
-            QVariantMap entry = list[i].toMap();
-            if( entry["status"] == QString( "completed" ) ){
-                m_downloadList.append( entry );
-            }
+            m_downloadList.append( list[i].toMap() );
         }
     }
 
@@ -85,9 +83,11 @@ namespace Purple
 
     QString DownloadsDataModel::itemType( QVariantList const & )
     {
-        return QString();
+        return QString( "all" );
     }
 
+    QVariantList DownloadsDataModel::downloads() { return m_downloadList; }
+    // TODO
     void DownloadsDataModel::removeItem( QVariantList const & )
     {
 

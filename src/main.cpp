@@ -15,7 +15,7 @@
  */
 
 #include "applicationui.hpp"
-
+#include "DownloadsDataModel.hpp"
 #include <bb/cascades/Application>
 
 #include <QLocale>
@@ -34,6 +34,6 @@ Q_DECL_EXPORT int main( int argc, char **argv )
     // Create the Application UI object, this is where the main.qml file
     // is loaded and the application scene is set.
     ApplicationUI appui;
-
+    qmlRegisterType<Purple::DownloadsDataModel>( "purple.model", 1, 0, "CppDataModel" );
     return Application::exec();
 }

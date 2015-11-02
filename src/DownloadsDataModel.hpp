@@ -20,6 +20,7 @@ namespace Purple
         Q_OBJECT
 
         Q_PROPERTY( QString source READ source WRITE setSource NOTIFY sourceChanged )
+        Q_PROPERTY( QVariantList downloads READ downloads )
     public:
         DownloadsDataModel( QObject *parent = 0 );
         virtual ~DownloadsDataModel();
@@ -31,6 +32,7 @@ namespace Purple
         QString                 m_source;
         QVariantList            m_downloadList;
     public slots:
+        QVariantList            downloads();
         Q_INVOKABLE int         childCount( QVariantList const & indexPath );
         Q_INVOKABLE bool        hasChildren( QVariantList const & indexPath );
         Q_INVOKABLE QVariant    data( QVariantList const & indexPath );

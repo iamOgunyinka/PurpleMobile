@@ -37,7 +37,6 @@ simulator {
 config_pri_assets {
     OTHER_FILES += \
         $$quote($$BASEDIR/assets/DownloadManager.qml) \
-        $$quote($$BASEDIR/assets/MyDownloadManager.qml) \
         $$quote($$BASEDIR/assets/MySettings.qml) \
         $$quote($$BASEDIR/assets/ad_search.png) \
         $$quote($$BASEDIR/assets/download.png) \
