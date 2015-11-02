@@ -1,9 +1,10 @@
 1
-12
+13
 ad_search.png
 download.png
 DownloadManager.qml
-download_queue.xml
+downloads_icon.png
+download_queue.json
 exit.png
 logo.png
 main.qml

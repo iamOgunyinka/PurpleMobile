@@ -9,6 +9,7 @@
 #include <src/ProjectSettings.hpp>
 #include <src/SyncNetworkManager.hpp>
 #include <src/DownloadManager.hpp>
+#include <src/DownloadsDataModel.hpp>
 
 using namespace bb::cascades;
 using Purple::ApplicationUI;
@@ -34,11 +35,12 @@ ApplicationUI::ApplicationUI() :
     qmlRegisterType<Purple::ProjectSettings>( "purple.settings", 1, 0, "CppSettings" );
     qmlRegisterType<Purple::SyncNetworkManager>( "purple.network", 1, 0, "CppNetworkManager" );
     qmlRegisterType<Purple::DownloadManager>( "purple.downloadManager", 1, 0,"CppDownloadManager" );
+    qmlRegisterType<Purple::DownloadsDataModel>( "purple.model", 1, 0, "CppDataModel" );
 
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
 
     QDeclarativePropertyMap *map = new QDeclarativePropertyMap;
-    map->insert( "settings", QVariant( QString( QDir::currentPath() + "/app/data/asset/settings.json" ) ));
+    map->insert( "settings", QVariant( QString( QDir::currentPath() + "/app/data/assets/settings.json" ) ));
     qml->setContextProperty( "dirPath", map );
 
     // Create root object for the UI
@@ -61,9 +63,9 @@ void ApplicationUI::onSystemLanguageChanged()
 void ApplicationUI::writeSettingsFile()
 {
     QDir dir;
-    dir.mkpath( "app/data/asset" );
+    dir.mkpath( "app/data/assets" );
 
-    QFile textFile( "app/data/asset/settings.json" );
+    QFile textFile( "app/data/assets/settings.json" );
     if( !textFile.exists() )
     {
         textFile.open( QIODevice::WriteOnly | QIODevice::Text );
@@ -75,7 +77,7 @@ void ApplicationUI::writeSettingsFile()
                 << "\"youtube_url\": \"https://www.googleapis.com/youtube/v3/search/?part=snippet\",\n"
                 << "\"appTheme\": \"light\",\n"
                 << "\"safeSearch\": \"moderate\",\n"
-                << "\"thumbnailsQuality\": \"default\"\n"
+                << "\"thumbnailsQuality\": \"default\",\n"
                 << "\"existsAction\": \"Overwrite\"\n"
                 << "}\n" << "]\n";
         textFile.close();

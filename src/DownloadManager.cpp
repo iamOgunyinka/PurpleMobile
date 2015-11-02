@@ -1,10 +1,11 @@
 #include <src/DownloadManager.hpp>
 #include <QTimer>
 #include <QUuid>
+#include <QDebug>
+#include <bb/data/JsonDataAccess.hpp>
 
 namespace Purple
 {
-
     DownloadManager::DownloadManager( QObject *parent ): QObject( parent )
     {
         setupDownloadManager();
@@ -12,13 +13,37 @@ namespace Purple
 
     DownloadManager::~DownloadManager()
     {
+
     }
 
     void DownloadManager::startDownload( QString const & url )
     {
         startDownloadImpl( url );
+        writeDownloadToFile( url );
     }
 
+    void DownloadManager::writeDownloadToFile( QString const & url )
+    {
+        bb::data::JsonDataAccess jda;
+        QVariantList list = jda.load( "app/data/assets/download_queue.json" ).toList();
+        if( !jda.hasError() ){
+            Downloads item = m_downloadHash[ m_urlHash[url] ];
+            QVariantMap newDownload;
+            newDownload[ "title" ] = item.m_file->fileName();
+            newDownload[ "url"] = item.m_url;
+            newDownload["thumbnail"] = QString( "app/data/assets/downloads_icon.png" );
+            newDownload["status"] = "incomplete";
+            newDownload["percentage"] = "";
+
+            list.append( list );
+            jda.save( list, "app/data/assets/download_queue.json" );
+            if( jda.hasError() ){
+                qDebug() << "Unable to save new JSON file";
+            }
+
+            emit newDownloadAdded();
+        }
+    }
     void DownloadManager::startDownloadImpl( QString const & url, QString const & path )
     {
         bool fileExist = false;
@@ -44,6 +69,7 @@ namespace Purple
         m_downloadQueue.enqueue(item);
     }
 
+    QQueue<Downloads> DownloadManager::downloads() const { return m_downloadQueue; }
     void DownloadManager::stopDownload( QString const & url )
     {
         stopDownloadImpl( url, false );
@@ -90,7 +116,8 @@ namespace Purple
     {
         m_userAgent = "PurpleMobile/1.0";
         m_downloadQueueSize = 2;
-        m_filePath = "file:///accounts/1000/shared/downloads/";
+        m_filePath = "/accounts/1000/shared/downloads";
+        m_partialDownloadPolicy = ContinueDownload;
     }
 
     void DownloadManager::startNextDownload()
@@ -103,12 +130,13 @@ namespace Purple
         if( m_downloadHash.size() < m_downloadQueueSize ){
             Downloads nextItem = m_downloadQueue.dequeue();
 
+            qDebug() << nextItem.m_destFile;
             QNetworkRequest request;
             request.setUrl( nextItem.m_url );
             request.setRawHeader( "USER-AGENT", m_userAgent.toUtf8() );
 
-            if( m_partialDownloadPolicy == ContinueDownload ){
-                nextItem.m_file = new QFile( nextItem.m_file );
+            if( m_partialDownloadPolicy == ContinueDownload && nextItem.m_tempExists ){
+                nextItem.m_file = new QFile( nextItem.m_tempFile );
                 if( !nextItem.m_file->open( QIODevice::ReadWrite ) ){
                     emit status( nextItem.m_url, "Error", nextItem.m_file->errorString(), nextItem.m_destFile );
                     startNextDownload();
@@ -129,12 +157,7 @@ namespace Purple
                 }
                 nextItem.m_tempSize = 0;
             }
-            QNetworkReply *reply = m_networkManager.get( request );
-            QObject::connect( reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress(qint64,qint64) ));
-            QObject::connect( reply, SIGNAL( finished() ), this, SLOT( downloadFinished() ) );
-            QObject::connect( reply, SIGNAL( readyRead() ), this, SLOT( downloadReadyRead() ) );
-            QObject::connect( reply, SIGNAL( error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError) ));
-
+            QNetworkReply *reply = startDownloadRequest( request );
             emit status( nextItem.m_url, "Download started", "Download started successfully", nextItem.m_destFile );
             nextItem.m_time.start();
             m_downloadHash[reply] = nextItem;
@@ -142,6 +165,17 @@ namespace Purple
 
             startNextDownload();
         }
+    }
+
+    QNetworkReply* DownloadManager::startDownloadRequest( QNetworkRequest const & request )
+    {
+        QNetworkReply *reply = m_networkManager.get( request );
+        QObject::connect( reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress(qint64,qint64) ));
+        QObject::connect( reply, SIGNAL( finished() ), this, SLOT( downloadFinished() ) );
+        QObject::connect( reply, SIGNAL( readyRead() ), this, SLOT( downloadReadyRead() ) );
+        QObject::connect( reply, SIGNAL( error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError) ));
+
+        return reply;
     }
 
     void DownloadManager::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
@@ -174,13 +208,33 @@ namespace Purple
     void DownloadManager::downloadReadyRead()
     {
         QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
-        Downloads item = m_downloadHash[reply];
-        item.m_file->write( reply->readAll() );
+        if( !hasRedirect( reply ) ){
+            Downloads item = m_downloadHash[reply];
+            item.m_file->write( reply->readAll() );
+        }
+    }
+
+    bool DownloadManager::hasRedirect( QNetworkReply *reply )
+    {
+        if( reply->error() == QNetworkReply::NoError ){
+            QVariant redirect = reply->attribute( QNetworkRequest::RedirectionTargetAttribute );
+            if( !redirect.isNull() ){
+                QUrl originalUrl = reply->request().url();
+                QString newUrl = originalUrl.resolved( redirect.toUrl() ).toString();
+                stopDownload( originalUrl.toString() );
+                startDownload( newUrl );
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
     }
 
     void DownloadManager::downloadFinished()
     {
         QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+        if( hasRedirect( reply ) ) return;
 
         if (reply->error() == QNetworkReply::NoError) {
 
@@ -256,7 +310,7 @@ namespace Purple
         }
 
         QString filePart = filePath + ".part";
-        if( QFile::exists( filePath ) ){
+        if( QFile::exists( filePart ) ){
             tempExist = true;
         }
         return filePath;

@@ -4,43 +4,8 @@ import bb.system 1.2
 import purple.downloadManager 1.0
 import purple.model 1.0
 
-Page {
+Container {
     id: downloadPageTab
-    titleBar: TitleBar {
-        kind: TitleBarKind.Segmented
-        options: [
-            Option {
-                text: "All"
-                value: 0
-            },
-            Option {
-                text: "Completed"
-                value: 1
-            },
-            Option {
-                text: "Stopped"
-                value: 2
-            }
-        ]
-        onSelectedOptionChanged: {
-            var value = selectedOption.value
-            switch ( value )
-            {
-                case 0: break;
-                case 1:{
-                        downloadPageTab.showCompletedDownloads(); 
-                        break;
-                }
-            case 2:{
-                    downloadPageTab.showStoppedDownloads();
-                    break;
-            }
-            }
-        }
-        id: downloadsTitleBar
-        title: "Downloads"
-    }
-    
     Container {
         id: rootContainer
         topPadding: 20
@@ -159,32 +124,41 @@ Page {
         myDownloadManager.status.connect( downloadPageTab.status )
         myDownloadManager.progress.connect( downloadPageTab.progress )
         myDownloadManager.finished.connect( downloadPageTab.finished )
+        myDownloadManager.newDownloadAdded.connect( newDownloadAdded )
     }
     
-    function finished(url, destination)
+    function newDownloadAdded()
+    {
+        dataModel.setSource( "download_queue.json" );
+    }
+    
+    function finished( m_url, destination )
     {
         systemToast.body = "Download Completed"
+        systemToast.exec();
     }
     
-    function progress( url, actualReceived, actualTotal, percent, speed, unit )
+    function progress( m_url, actualReceived, actualTotal, percent, speed, unit )
     {
         progressIndicator.value = percent
         var downloadProgressText = "Downloaded " + actualReceived + " of " + actualTotal
-        console.log( downloadProgressText )
-        downloadStatus.text = downloadProgressText
+        console.log( "Downloaded ", actualReceived, " with total speed of ", speed, unit )
+//        downloadStatus.text = downloadProgressText
     }
     
     //TODO
-    function status( url, title, status, data )
+    function status( m_url, title, status, data )
     {
         if( title == "Download started" ){
-            console.log( "Download Started" );
+            systemToast.body = "Download started";
+            systemToast.exec();
         } else if( title == "Error" ) {
-        
+            console.log( "Error reported ", status )
         } else if( title == "Cancel" ) {
-        
+            systemToast.body = "Download already completed";
+            systemToast.exec()
         } else { //Complete Download
-        
+            console.log( "Download Completed" )
         }
     }
     

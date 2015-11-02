@@ -61,7 +61,7 @@ TabbedPane {
             loadingIndicator.stop()
             resultDropDown.visible = true
             
-            errorDialog.body = result
+            myResult.text = result
         }
         
         function errorGotten(error) {
@@ -80,8 +80,9 @@ TabbedPane {
             loadingIndicator.running = true
             loadingIndicator.start()
             
-//            cpptool_settings.setProjectFile( dirPath.settings );
-            var m_url = "https://www.googleapis.com/youtube/v3/search/?part=snippet"
+            cpptool_settings.setProjectFile( dirPath.settings );
+            var m_url = cpptool_settings.youtubeUrl
+            console.log( m_url ) 
             
             m_url = m_url + "&q=" + cpptool_network.toPercentageEncoding(query)
             m_url = m_url + "&maxResults=" + cpptool_settings.maxResult
@@ -104,7 +105,7 @@ TabbedPane {
                     }
                 case 2:
                     {
-                        mainDownloadManager.startNewDownload( searchText )
+                        downloadManager.startNewDownload( searchText )
                         break;
                     }
                 default : break;
@@ -255,8 +256,43 @@ TabbedPane {
         id: downloadsTab
         title: "Downloads"
         imageSource: "asset:///download.png"
-        content: DownloadManager {
-            id: mainDownloadManager
+        content: Page {
+            titleBar: TitleBar {
+                kind: TitleBarKind.Segmented
+                options: [
+                    Option {
+                        text: "All"
+                        value: 0
+                    },
+                    Option {
+                        text: "Completed"
+                        value: 1
+                    },
+                    Option {
+                        text: "Stopped"
+                        value: 2
+                    }
+                ]
+                onSelectedOptionChanged: {
+                    var value = selectedOption.value
+                    switch ( value ){
+                        case 0: break;
+                        case 1: {
+                            downloadManager.showCompletedDownloads(); 
+                            break;
+                        }
+                        case 2: {
+                            downloadManager.showStoppedDownloads();
+                            break;
+                        }
+                    }
+                }
+                id: downloadsTitleBar
+                title: "Downloads"
+            }
+            DownloadManager {
+                id: downloadManager
+            }
         }
     }
 }

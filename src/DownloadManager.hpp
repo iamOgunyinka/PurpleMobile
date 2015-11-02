@@ -35,28 +35,30 @@ namespace Purple
         QTime   m_time;
         bool    m_tempExists;
         int     m_tempSize;
-
-        Downloads(): m_key(), m_url(), m_destFile(), m_tempFile(), m_file( NULL ), m_time(), m_tempExists(false), m_tempSize(0){}
-        ~Downloads() { if( m_file ) delete m_file; }
     };
 
     class DownloadManager: public QObject
     {
         Q_OBJECT
 
+        Q_PROPERTY( QQueue<Downloads> downloads READ downloads CONSTANT )
     public:
         DownloadManager( QObject *parent = 0 );
         virtual ~DownloadManager();
 
+        QQueue<Downloads>           downloads() const;
         Q_INVOKABLE void            startDownload( QString const & url );
         Q_INVOKABLE void            stopDownload( QString const & url );
         Q_INVOKABLE void            pauseDownload( QString const & url );
         Q_INVOKABLE void            resumeDownload( QString const & url, QString const & path = QString() );
     private:
-        void        setupDownloadManager();
-        void        startDownloadImpl( QString const & url, QString const & path = QString() );
-        void        stopDownloadImpl( QString const & url, bool pause );
-        QString     saveFilename( QString const & url, bool &fileExists, QString & filename, bool &tempExists, bool isUrl );
+        void            setupDownloadManager();
+        void            startDownloadImpl( QString const & url, QString const & path = QString() );
+        void            stopDownloadImpl( QString const & url, bool pause );
+        bool            hasRedirect( QNetworkReply *reply );
+        void            writeDownloadToFile( QString const & url );
+        QNetworkReply*  startDownloadRequest( QNetworkRequest const & request );
+        QString         saveFilename( QString const & url, bool &fileExists, QString & filename, bool &tempExists, bool isUrl );
     private:
         PartialDownloadPolicy           m_partialDownloadPolicy;
         ExistDownloadPolicy             m_existDownloadPolicy;
@@ -79,6 +81,7 @@ namespace Purple
         void        progress( QString const &url, qint64, qint64, int, double, QString const & unit );
         void        finished( QString const & url, QString const & destination );
         void        downloadQueueEmpty();
+        void        newDownloadAdded();
     };
 
 } /* namespace Purple */
