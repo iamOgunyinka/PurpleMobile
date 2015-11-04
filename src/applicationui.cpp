@@ -6,10 +6,9 @@
 #include <bb/cascades/QmlDocument>
 #include <bb/cascades/AbstractPane>
 #include <bb/cascades/LocaleHandler>
-#include <src/ProjectSettings.hpp>
-#include <src/SyncNetworkManager.hpp>
 #include <src/DownloadManager.hpp>
 #include <src/DownloadsDataModel.hpp>
+#include <src/YTManager.hpp>
 
 using namespace bb::cascades;
 using Purple::ApplicationUI;
@@ -32,10 +31,10 @@ ApplicationUI::ApplicationUI() :
 
     // Create scene document from main.qml asset, the parent is set
     // to ensure the document gets destroyed properly at shut down.
-    qmlRegisterType<Purple::ProjectSettings>( "purple.settings", 1, 0, "CppSettings" );
-    qmlRegisterType<Purple::SyncNetworkManager>( "purple.network", 1, 0, "CppNetworkManager" );
     qmlRegisterType<Purple::DownloadManager>( "purple.downloadManager", 1, 0,"CppDownloadManager" );
     qmlRegisterType<Purple::DownloadsDataModel>( "purple.model", 1, 0, "CppDataModel" );
+    qmlRegisterType<Purple::YTManager>( "purple.youtube", 1, 0, "CppYoutube" );
+    qmlRegisterType<Purple::YTDataManager>( "purple.searchModel", 1, 0, "CppSearchDataModel" );
 
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
 
@@ -81,6 +80,5 @@ void ApplicationUI::writeSettingsFile()
                 << "\"existsAction\": \"Overwrite\"\n"
                 << "}\n" << "]\n";
         textFile.close();
-        qDebug() << "Settings written successfully";
     }
 }

@@ -56,20 +56,18 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/DownloadManager.cpp) \
         $$quote($$BASEDIR/src/DownloadsDataModel.cpp) \
         $$quote($$BASEDIR/src/ProjectFile.cpp) \
-        $$quote($$BASEDIR/src/ProjectSettings.cpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.cpp) \
+        $$quote($$BASEDIR/src/YTManager.cpp) \
         $$quote($$BASEDIR/src/applicationui.cpp) \
-        $$quote($$BASEDIR/src/main.cpp) \
-        $$quote($$BASEDIR/src/result.cpp)
+        $$quote($$BASEDIR/src/main.cpp)
 
     HEADERS += \
         $$quote($$BASEDIR/src/DownloadManager.hpp) \
         $$quote($$BASEDIR/src/DownloadsDataModel.hpp) \
         $$quote($$BASEDIR/src/ProjectFile.hpp) \
-        $$quote($$BASEDIR/src/ProjectSettings.hpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.hpp) \
-        $$quote($$BASEDIR/src/applicationui.hpp) \
-        $$quote($$BASEDIR/src/result.hpp)
+        $$quote($$BASEDIR/src/YTManager.hpp) \
+        $$quote($$BASEDIR/src/applicationui.hpp)
 }
 
 CONFIG += precompile_header

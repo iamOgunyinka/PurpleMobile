@@ -34,6 +34,8 @@ namespace Purple
     QString AppSettings::thumbnailsQuality() const { return m_thumbnailsQuality;}
     void AppSettings::setAppTheme( QString const & app_theme ) { m_appTheme = app_theme; }
     QString AppSettings::appTheme() const { return m_appTheme; }
+    void AppSettings::setFileExistencePolicy( QString const & f ){ m_fileExistencePolicy = f; }
+    QString AppSettings::fileExistencePolicy() { return m_fileExistencePolicy; }
 
     ProjectFile::ProjectFile():
             m_apiInfo(), m_appSettings()

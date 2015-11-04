@@ -26,6 +26,7 @@ namespace Purple
         QString         m_appTheme;
         QString         m_safeSearch;
         QString         m_thumbnailsQuality;
+        QString         m_fileExistencePolicy;
 
         AppSettings( QString const & app_theme = QString(), QString const & safe_search = QString(), QString const & thumbnailsQuality = QString() );
 
@@ -35,7 +36,8 @@ namespace Purple
         QString thumbnailsQuality() const;
         void setAppTheme( QString const & app_theme );
         QString appTheme() const;
-
+        void setFileExistencePolicy( QString const & f );
+        QString fileExistencePolicy();
     };
 
     class ProjectFile

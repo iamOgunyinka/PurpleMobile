@@ -1,8 +1,8 @@
-import bb.cascades 1.0
+import bb.cascades 1.2
 import bb.system 1.0
 import bb.data 1.0
-import purple.network 1.0
-import purple.settings 1.0
+import purple.searchModel 1.0
+import purple.youtube 1.0
 
 TabbedPane {
     id: root
@@ -10,17 +10,12 @@ TabbedPane {
     Menu.definition: MenuDefinition {
         settingsAction: SettingsActionItem {
             onTriggered: {
+                settingsSheet.updateContent()
                 settingsSheet.open();
             }
         }
     }
     attachedObjects: [
-        CppSettings {
-            id: cpptool_settings
-        },
-        CppNetworkManager {
-            id: cpptool_network
-        },
         ActivityIndicator {
             id: loadingIndicator
             running: false
@@ -32,18 +27,43 @@ TabbedPane {
             body: ""
         },
         Sheet {
+            function updateContent()
+            {
+                mySheetSettings.appTheme = youtubeManager.appTheme
+                mySheetSettings.fileExist = youtubeManager.fileExistPolicy
+                mySheetSettings.maxResults = youtubeManager.maxResult
+                mySheetSettings.safeSearch = youtubeManager.safeSearch
+                mySheetSettings.thumbnails = youtubeManager.thumbnailsQuality
+            }
+            
             id: settingsSheet
             Page { 
                 titleBar: TitleBar {
                     title: "Settings"
                 }
-                content: MySettings {} 
+                onCreationCompleted: {
+                    settingsSheet.updateContent()
+                }
+                content: MySettings {
+                    id: mySheetSettings
+                    onAppThemeChanged: {
+                        youtubeManager.appTheme = value
+                    }
+                    onFileExistChanged: {
+                        youtubeManager.appTheme = value
+                    }
+                    onThumbnailsQualityChanged: {
+                        youtubeManager.thumbnailsQuality = value
+                    }
+                    onMaxResultChanged: {
+                        youtubeManager.maxResult = value
+                    }
+                }
                 actions: [
                     ActionItem {
                         title: "Close"
                         ActionBar.placement: ActionBarPlacement.OnBar
                         onTriggered: {
-                            //TODO --> Write new settings to file
                             settingsSheet.close()
                         }
                     }
@@ -61,7 +81,6 @@ TabbedPane {
             loadingIndicator.stop()
             resultDropDown.visible = true
             
-            myResult.text = result
         }
         
         function errorGotten(error) {
@@ -70,31 +89,16 @@ TabbedPane {
             errorDialog.show()
         }
         
-        function download( _url )
-        {
-            cpptool_network.sendRequest( _url );
-        }
-        
         function processRequest(query)
         {
             loadingIndicator.running = true
-            loadingIndicator.start()
-            
-            cpptool_settings.setProjectFile( dirPath.settings );
-            var m_url = cpptool_settings.youtubeUrl
-            console.log( m_url ) 
-            
-            m_url = m_url + "&q=" + cpptool_network.toPercentageEncoding(query)
-            m_url = m_url + "&maxResults=" + cpptool_settings.maxResult
-            m_url = m_url + "&key=AIzaSyBhl_zBnEEv_xiIukkMpz8ayoiwT1UdfQk"
-            
-            download( m_url )
+            loadingIndicator.start()            
+            youtubeManager.search( query )
         }
         
         function processSearchOrDownload( searchText )
         {
             resultDropDown.visible = false
-            myResult.setText("")
             if( searchText.valueOf() == "".valueOf() ) return;
             
             switch ( segmentedHomePage.selectedIndex ){
@@ -237,19 +241,51 @@ TabbedPane {
                     }
                 }
                 
-                ScrollView {
-                    Label {
-                        id: myResult
+                Container {
+                    ListView {
+                        id: listView
+                        dataModel: searchDataModel
+                        listItemComponents: [
+                            ListItemComponent {
+                                type: ""
+                                Header {
+                                    title: ListItem.value
+                                }
+                            },
+                            ListItemComponent {
+                                type: ""
+                                StandardListItem {
+                                    title: ListItem.title
+                                    imageSource: ListItem.thumbnails
+                                    status: ListItem.owner
+                                    description: ListItem.description
+                                }
+                            }
+                        ]
                     }
                 }
             }
         }
         onCreationCompleted: {
-            cpptool_network.finished.connect( homeTab.searchResultObtained )
-            cpptool_network.networkError.connect( homeTab.errorGotten )
-            cpptool_network.errorOccurred.connect( homeTab.errorGotten )
-            cpptool_settings.errorOccurred.connect( homeTab.errorGotten )
+            youtubeManager.setProjectFile( "app/data/assets/settings.json" );
         }
+        attachedObjects: [
+            CppSearchDataModel {
+                id: searchDataModel
+                onError: {
+                    homeTab.errorGotten( what )
+                }
+            },
+            CppYoutube {
+                id: youtubeManager
+                onError: {
+                    homeTab.errorGotten( what )
+                }
+                onFinished: {
+                    searchDataModel.setSource( data )
+                }
+            }
+        ]
     }
     
     Tab {

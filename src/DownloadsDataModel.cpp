@@ -86,10 +86,20 @@ namespace Purple
         return QString( "all" );
     }
 
-    QVariantList DownloadsDataModel::downloads() { return m_downloadList; }
-    // TODO
-    void DownloadsDataModel::removeItem( QVariantList const & )
-    {
+    QVariantList DownloadsDataModel::downloadsList() { return m_downloadList; }
 
+    void DownloadsDataModel::removeItem( QVariantList const & indexPath )
+    {
+        if( indexPath.size() == 2 ){
+            m_downloadList.removeAt( indexPath.at(1).toInt() );
+            emit itemRemoved( indexPath );
+        }
+    }
+
+    void DownloadsDataModel::reload()
+    {
+        QString temp_source = m_source;
+        m_source.clear();
+        setSource( temp_source );
     }
 } /* namespace Purple */

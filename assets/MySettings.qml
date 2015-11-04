@@ -1,15 +1,33 @@
 import bb.cascades 1.0
 
 Container {
-    property string  thumbnailsQuality;
-    property string  appTheme;
-    property int     maxResults;
-    property string  safeSearch;
-    property string  fileExists;
+    property string thumbnails
+    property string appTheme
+    property string fileExist
+    property string safeSearch
+    property int maxResults
+    
+    signal thumbnailsQualityChanged( string value )
+    signal appThemeChanged( string value )
+    signal maxResultChanged( int value )
+    signal safeSearchChanged( string value )
+    signal fileExistChanged( string value )
     
     topPadding: 30
     leftPadding: 30
     rightPadding: 30
+    
+    id: root
+    onCreationCompleted: {
+        appThemeOption.setSelectedIndex( appTheme == "Light" ? 0 : 1);
+        
+        if( safeSearch == "None") safeSearchOption.setSelectedIndex(0)
+        else if ( safeSearch == "Moderate") safeSearchOption.setSelectedIndex(1)
+        else safeSearchOption.setSelectedIndex(2)
+        
+        sliderMaxResult.setValue( maxResults )
+    }
+    
     DropDown {
         id: appThemeOption
         title: "Theme"
@@ -22,10 +40,7 @@ Container {
             }
         ]
         onSelectedOptionChanged: {
-            appTheme = selectedOption.text
-        }
-        onCreationCompleted: {
-            appThemeOption.setSelectedIndex( 0 )
+            root.appThemeChanged( selectedOption.text )
         }
     }
     Divider {}
@@ -36,29 +51,26 @@ Container {
         options: [
             Option {
                 text: "None"
+                value: 0
             },
             Option {
                 text: "Moderate"
+                value: 1
             },
             Option {
                 text: "Strict"
+                value: 2
             }
         ]
-        onCreationCompleted: {
-            safeSearchOption.setSelectedIndex(0)
-        }
         onSelectedOptionChanged: {
-            safeSearch = selectedOption.text
+            root.safeSearchChanged( selectedOption.text )
         }
     }
     DropDown {
         id: thumbnailsQualityOption            
         title: "Thumbnails Quality"
         onSelectedOptionChanged: {
-            thumbnailsQuality = selectedOption.text
-        }
-        onCreationCompleted: {
-            thumbnailsQualityOption.setSelectedIndex(0)
+            root.thumbnailsQualityChanged( selectedOption.text )
         }
         options: [
             Option {
@@ -79,12 +91,13 @@ Container {
             text: "Results per search"
         }
         Slider {
+            id: sliderMaxResult
             fromValue: 5
             toValue: 50
-            value: 20
             onValueChanged: {
-                maximumResultsLabel.text = "Results per search: " + Math.round( value )
-                maxResults = Math.round( value )
+                var val = Math.round( value )
+                maximumResultsLabel.text = "Results per search: " + val
+                root.maxResultChanged( val )
             }
         }
     }
@@ -107,11 +120,8 @@ Container {
                     text: "Rename"
                 }
             ]
-            onCreationCompleted: {
-                fileExistsOption.setSelectedIndex(1)
-            }
             onSelectedOptionChanged: {
-                fileExists = selectedOption.text                
+                root.fileExistChanged( selectedOption.text )                
             }
         }
     }

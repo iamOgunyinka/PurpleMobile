@@ -21,6 +21,7 @@ Container {
         ]
         
         ListView {
+            id: listView
             dataModel: CppDataModel {
                 id: dataModel
                 source: "download_queue.json"
@@ -129,7 +130,8 @@ Container {
     
     function newDownloadAdded()
     {
-        dataModel.setSource( "download_queue.json" );
+        listView.dataModel.reload()
+        listView.setDataModel( dataModel )
     }
     
     function finished( m_url, destination )
@@ -169,11 +171,25 @@ Container {
     
     // TODO
     function showCompletedDownloads()
-    {  
+    {
+        listView.clearSelection();
+        var allDownloads = listView.dataModel.downloadsList;
+        for( var i = 0; allDownloads.length; ++i ){
+            if( allDownloads[i]["status"] == "completed" ){
+                
+            }
+        }
     }
     
+    //TODO
     function showStoppedDownloads()
     {
-        //
+        listView.clearSelection();
+        var allDownloads = listView.dataModel.downloadsList;
+        for( var i = 0; allDownloads.length; ++i ){
+            if( allDownloads[i]["status"] == "incomplete" ){
+                //
+            }
+        }
     }
 }

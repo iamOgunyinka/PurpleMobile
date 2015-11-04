@@ -18,6 +18,11 @@ namespace Purple
 
     void DownloadManager::startDownload( QString const & url )
     {
+        if( !isValidUrl( url ) ){
+            qDebug() << url << " is invalid.";
+            emit status( url, "Error", "Invalid URL", "" );
+            return;
+        }
         startDownloadImpl( url );
         writeDownloadToFile( url );
     }
@@ -33,17 +38,17 @@ namespace Purple
             newDownload[ "url"] = item.m_url;
             newDownload["thumbnail"] = QString( "app/data/assets/downloads_icon.png" );
             newDownload["status"] = "incomplete";
-            newDownload["percentage"] = "";
+            newDownload["percentage"] = 0;
 
-            list.append( list );
+            list.append( newDownload );
             jda.save( list, "app/data/assets/download_queue.json" );
             if( jda.hasError() ){
                 qDebug() << "Unable to save new JSON file";
             }
-
             emit newDownloadAdded();
         }
     }
+
     void DownloadManager::startDownloadImpl( QString const & url, QString const & path )
     {
         bool fileExist = false;
@@ -67,6 +72,11 @@ namespace Purple
             QTimer::singleShot( 0, this, SLOT( startNextDownload() ) );
 
         m_downloadQueue.enqueue(item);
+    }
+
+    bool DownloadManager::isValidUrl( QString const & url )
+    {
+        return QUrl( url, QUrl::StrictMode ).isValid();
     }
 
     QQueue<Downloads> DownloadManager::downloads() const { return m_downloadQueue; }
@@ -130,7 +140,6 @@ namespace Purple
         if( m_downloadHash.size() < m_downloadQueueSize ){
             Downloads nextItem = m_downloadQueue.dequeue();
 
-            qDebug() << nextItem.m_destFile;
             QNetworkRequest request;
             request.setUrl( nextItem.m_url );
             request.setRawHeader( "USER-AGENT", m_userAgent.toUtf8() );
@@ -283,6 +292,9 @@ namespace Purple
 
         if( baseName.isEmpty() ){
             baseName = QUuid::createUuid();
+        }
+        if( filenameSuffix.isEmpty() ){
+            filenameSuffix = "nil";
         }
 
         QString filePath = url;

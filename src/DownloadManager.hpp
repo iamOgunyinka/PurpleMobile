@@ -46,6 +46,7 @@ namespace Purple
         DownloadManager( QObject *parent = 0 );
         virtual ~DownloadManager();
 
+
         QQueue<Downloads>           downloads() const;
         Q_INVOKABLE void            startDownload( QString const & url );
         Q_INVOKABLE void            stopDownload( QString const & url );
@@ -57,6 +58,7 @@ namespace Purple
         void            stopDownloadImpl( QString const & url, bool pause );
         bool            hasRedirect( QNetworkReply *reply );
         void            writeDownloadToFile( QString const & url );
+        bool            isValidUrl( QString const & url );
         QNetworkReply*  startDownloadRequest( QNetworkRequest const & request );
         QString         saveFilename( QString const & url, bool &fileExists, QString & filename, bool &tempExists, bool isUrl );
     private:
@@ -70,7 +72,7 @@ namespace Purple
         QList<Downloads>                m_completedList;
         QHash<QNetworkReply*, Downloads> m_downloadHash;
         QHash<QString, QNetworkReply*>  m_urlHash;
-    private slots:
+    private Q_SLOTS:
         void startNextDownload();
         void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
         void downloadReadyRead();
