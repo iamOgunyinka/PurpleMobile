@@ -70,35 +70,6 @@ namespace Purple
         m_networkManager->sendRequest( youtube_query );
     }
 
-    int     YTManager::maxResult()  { return m_projectFileHandler->apiInfo().maxResults(); }
-
-    QString YTManager::safeSearch() { return m_projectFileHandler->appSettings().safeSearch(); }
-
-    QString YTManager::thumbnailsQuality() { return m_projectFileHandler->appSettings().thumbnailsQuality(); }
-
-    void YTManager::setMaxResult( int value ) { m_projectFileHandler->apiInfo().setMaxResults( value ); }
-
-    void YTManager::setAppTheme( QString const & app_theme ){ m_projectFileHandler->appSettings().setAppTheme( app_theme ); }
-
-    QString YTManager::appTheme() { return m_projectFileHandler->appSettings().appTheme(); }
-
-    void YTManager::setSafeSearch( QString const & safe_search )
-    {
-        if( safe_search != m_projectFileHandler->appSettings().safeSearch() ){
-            m_projectFileHandler->appSettings().setSafeSearch( safe_search );
-        }
-    }
-
-    void YTManager::setFileExistPolicy( QString const & filePolicy ) { m_projectFileHandler->appSettings().setFileExistencePolicy( filePolicy ); }
-    QString YTManager::fileExistPolicy() { return m_projectFileHandler->appSettings().fileExistencePolicy(); }
-
-    void YTManager::setThumbnailsQuality( QString const & thumbnails_quality )
-    {
-        if( thumbnails_quality != m_projectFileHandler->appSettings().thumbnailsQuality() ){
-            m_projectFileHandler->appSettings().setThumbnailsQuality( thumbnails_quality );
-        }
-    }
-
     void YTManager::setProjectFile( QString const & location )
     {
         bb::data::JsonDataAccess jda;
@@ -118,17 +89,89 @@ namespace Purple
         }
     }
 
-    YTDataManager::YTDataManager( QObject *parent ): bb::cascades::DataModel( parent )
+    MyIndexMapper::MyIndexMapper( int index, int count, bool deleted ):
+            m_index( index ), m_count( count ), m_deleted( deleted )
     {
     }
 
-    YTDataManager::~YTDataManager(){}
-
-    void YTDataManager::setSource( QString const & buffer )
+    bool MyIndexMapper::newIndexPath( QVariantList *pNewIndexPath, int *replacementIndex, QVariantList const & oldIndexPath ) const
     {
-        qDebug() << buffer;
+        if (oldIndexPath[0].toInt() < m_index) {
+            pNewIndexPath->append(oldIndexPath);
+            return true;
+
+        // Deleted indices
+        } else if (m_deleted && oldIndexPath[0].toInt() <= m_index + m_count) {
+            *replacementIndex = m_index;
+            return false;
+
+        // Indices after a deletion or addition
+        } else {
+            if (m_deleted)
+                pNewIndexPath->append(oldIndexPath[0].toInt() - m_count);
+            else
+                pNewIndexPath->append(oldIndexPath[0].toInt() + m_count);
+            return true;
+        }
+    }
+
+    YTDataManager::YTDataManager( QObject *parent ): bb::cascades::DataModel( parent ), m_ytManager( new YTManager( this ))
+    {
+        QObject::connect( m_ytManager, SIGNAL( error(QString)), this, SLOT(onError(QString)));
+        QObject::connect( m_ytManager, SIGNAL( finished(QString)), this, SLOT(onFinished( QString )));
+    }
+
+    YTDataManager::~YTDataManager(){}
+    void YTDataManager::search( QString const & searchString )
+    {
+        m_ytManager->search( searchString );
+        QVariantMap lmap;
+        lmap["searching"] = true;
+        m_videoResultList.append( lmap );
+        emit searching();
+    }
+
+    void YTDataManager::removeLoading()
+    {
+        m_videoResultList.removeLast();
+        QVariantList indexPath;
+        indexPath.append( m_videoResultList.size() );
+        emit itemRemoved( indexPath );
+    }
+
+    void YTDataManager::setProjectFile( QString const & location )
+    {
+        m_ytManager->setProjectFile( location );
+    }
+
+    void YTDataManager::onError( QString const & message )
+    {
+        emit error( message );
+    }
+
+    void YTDataManager::onFinished( QString const & data )
+    {
+        if( data != m_data )
+        {
+            m_data = data;
+            load( m_data );
+            emit dataChanged( m_data );
+        }
+    }
+
+    void YTDataManager::load( QString const & buffer )
+    {
+        removeLoading();
+        m_videoResultList.clear();
+
         bb::data::JsonDataAccess jda;
         QVariantMap rootMap = jda.loadFromBuffer( buffer ).toMap();
+
+        if( jda.hasError() ){
+            emit error( jda.error().errorMessage() );
+            return;
+        }
+
         if( rootMap["kind"].toString() == QString( "error" ) ){
             emit error( "Unable to process request" );
         } else {
@@ -145,11 +188,44 @@ namespace Purple
                 m_videoResultList.append( item );
             }
         }
-        emit sourceChanged( source() );
+
+        emit itemsChanged( bb::cascades::DataModelChangeType::AddRemove, QSharedPointer<bb::cascades::DataModel::IndexMapper>(
+                new MyIndexMapper( 0, m_videoResultList.size(), false )));
     }
 
-    QString YTDataManager::source(){ return QString(); }
-    QVariantList YTDataManager::videoResultList(){ return m_videoResultList; }
+    int     YTDataManager::maxResult()  { return m_ytManager->projectHandler()->apiInfo().maxResults(); }
+
+    QString YTDataManager::safeSearch() { return m_ytManager->projectHandler()->appSettings().safeSearch(); }
+
+    QString YTDataManager::thumbnailsQuality() { return m_ytManager->projectHandler()->appSettings().thumbnailsQuality(); }
+
+    void YTDataManager::setMaxResult( int value ) { m_ytManager->projectHandler()->apiInfo().setMaxResults( value ); }
+
+    void YTDataManager::setAppTheme( QString const & app_theme ){ m_ytManager->projectHandler()->appSettings().setAppTheme( app_theme ); }
+
+    QString YTDataManager::appTheme() { return m_ytManager->projectHandler()->appSettings().appTheme(); }
+
+    void YTDataManager::setSafeSearch( QString const & safe_search )
+    {
+        if( safe_search != m_ytManager->projectHandler()->appSettings().safeSearch() ){
+            m_ytManager->projectHandler()->appSettings().setSafeSearch( safe_search );
+        }
+    }
+
+    void YTDataManager::setFileExistPolicy( QString const & filePolicy )
+    {
+        m_ytManager->projectHandler()->appSettings().setFileExistencePolicy( filePolicy );
+    }
+
+    QString YTDataManager::fileExistPolicy() { return m_ytManager->projectHandler()->appSettings().fileExistencePolicy(); }
+
+    void YTDataManager::setThumbnailsQuality( QString const & thumbnails_quality )
+    {
+        if( thumbnails_quality != m_ytManager->projectHandler()->appSettings().thumbnailsQuality() ){
+            m_ytManager->projectHandler()->appSettings().setThumbnailsQuality( thumbnails_quality );
+        }
+    }
+
 
     bool YTDataManager::hasChildren( QVariantList const & indexPath )
     {
@@ -176,11 +252,6 @@ namespace Purple
         Q_UNUSED(indexPath);
     }
 
-    QString YTDataManager::itemType( QVariantList const & )
-    {
-        return QString();
-    }
-
     QVariant YTDataManager::data( QVariantList const & indexPath )
     {
         if( indexPath.size() == 1 ){
@@ -190,6 +261,7 @@ namespace Purple
                 return header;
             }
         } else if( indexPath.size() == 2 ) {
+            qDebug() << "Title: " << m_videoResultList.at( indexPath.at(1).toInt()).toMap()["title"].toString();
             return m_videoResultList.at( indexPath.at( 1 ).toInt() );
         }
         return QVariant();

@@ -5,6 +5,8 @@ namespace Purple
     SyncNetworkManager::SyncNetworkManager( QObject *parent ):
                     QObject( parent ), m_networkManager()
     {
+        QObject::connect( &m_networkManager, SIGNAL(networkAccessibleChanged(QNetworkAccessManager::NetworkAccessibility)),
+                this, SLOT(onError( QNetworkAccessManager::NetworkAccessibility )));
     }
 
     SyncNetworkManager::~SyncNetworkManager()
@@ -78,6 +80,18 @@ namespace Purple
                 break;
             default:
                 emit networkError( "Unknown Network Error" );
+                break;
+        }
+    }
+
+    void SyncNetworkManager::onError( QNetworkAccessManager::NetworkAccessibility err )
+    {
+        switch( err )
+        {
+            case -1: case 0:
+                emit networkError( "Network Inaccessible" );
+                break;
+            case 1: default:
                 break;
         }
     }

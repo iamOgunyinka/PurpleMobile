@@ -3,3 +3,5 @@ config-pri.version=2.0
 eclipse.preferences.version=1
 white-list.Settings=
 white-list._ytDataModelManager=
+white-list.searchDataModel=
+white-list.youtubeManager=

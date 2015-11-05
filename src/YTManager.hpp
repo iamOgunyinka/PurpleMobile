@@ -14,6 +14,43 @@ namespace Purple
     {
         Q_OBJECT
 
+    public:
+        YTManager( QObject *parent = 0 );
+        virtual ~YTManager();
+        QSharedPointer<ProjectFile> projectHandler() { return m_projectFileHandler; }
+        void search( QString const & searchString );
+        void setProjectFile( QString const & location );
+
+    private:
+        SyncNetworkManager*                m_networkManager;
+        QSharedPointer<ProjectFile>        m_projectFileHandler;
+    private:
+        void saveSettings();
+
+    private slots:
+        void onError( QString const & err );
+        void onFinished( QString const & data );
+    signals:
+        void error( QString const & what );
+        void finished( QString const & data );
+        void sourceChanged( QString const & );
+    };
+
+    class MyIndexMapper: public bb::cascades::DataModel::IndexMapper
+    {
+    public:
+        MyIndexMapper( int index, int count, bool deleted );
+        bool newIndexPath( QVariantList *pNewIndexPath, int *pReplacementIndex, const QVariantList &oldIndexPath ) const;
+
+    private:
+        int m_index;
+        int m_count;
+        bool m_deleted;
+    };
+
+    class YTDataManager: public bb::cascades::DataModel
+    {
+        Q_OBJECT
         Q_PROPERTY( int maxResult READ maxResult WRITE setMaxResult )
         Q_PROPERTY( QString appTheme READ appTheme WRITE setAppTheme )
         Q_PROPERTY( QString safeSearch READ safeSearch WRITE setSafeSearch )
@@ -21,17 +58,15 @@ namespace Purple
         Q_PROPERTY( QString thumbnailsQuality READ thumbnailsQuality WRITE setThumbnailsQuality )
 
     public:
-        YTManager( QObject *parent = 0 );
-        virtual ~YTManager();
-        QSharedPointer<ProjectFile> projectHandler() { return m_projectFileHandler; }
+        YTDataManager( QObject* parent = 0 );
+        ~YTDataManager();
 
         Q_INVOKABLE void search( QString const & searchString );
         Q_INVOKABLE void setProjectFile( QString const & location );
+
     private:
-        SyncNetworkManager*                m_networkManager;
-        QSharedPointer<ProjectFile>        m_projectFileHandler;
-    private:
-        void saveSettings();
+
+        void removeLoading();
 
         int maxResult();
         void setMaxResult( int value );
@@ -48,40 +83,25 @@ namespace Purple
         QString thumbnailsQuality();
         void setThumbnailsQuality( QString const & thumbnails_quality );
 
-    private slots:
-        void onError( QString const & err );
-        void onFinished( QString const & data );
-    signals:
-        void error( QString const & what );
-        void finished( QString const & data );
-    };
-
-
-    class YTDataManager: public bb::cascades::DataModel
-    {
-        Q_OBJECT
-
-        Q_PROPERTY( QString source READ source WRITE setSource NOTIFY sourceChanged )
-        Q_PROPERTY( QVariantList videoResultList READ videoResultList )
-
-    public:
-        YTDataManager( QObject* parent = 0 );
-        ~YTDataManager();
     public slots:
-        QString source();
-        void setSource( QString const & s );
-        QVariantList videoResultList();
-
         Q_INVOKABLE bool hasChildren( QVariantList const & indexPath );
         Q_INVOKABLE int childCount( QVariantList const & indexPath );
         Q_INVOKABLE QVariant data( QVariantList const & indexPath );
+
         Q_INVOKABLE void removeItem( QVariantList const & indexPath );
-        Q_INVOKABLE QString itemType( QVariantList const & indexPath );
+
+    private slots:
+        void load( QString const & data );
+        void onFinished( QString const & data );
+        void onError( QString const & message );
     private:
+        YTManager    *m_ytManager;
         QVariantList  m_videoResultList;
+        QString       m_data;
     signals:
-        void sourceChanged( QString const & s );
-        void error( QString const & what );
+        void error( QString const & message );
+        void dataChanged( QString const & data );
+        void searching();
     };
 } /* namespace Purple */
 

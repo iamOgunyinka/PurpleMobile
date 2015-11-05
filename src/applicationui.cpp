@@ -29,13 +29,12 @@ ApplicationUI::ApplicationUI() :
     onSystemLanguageChanged();
     writeSettingsFile();
 
-    // Create scene document from main.qml asset, the parent is set
-    // to ensure the document gets destroyed properly at shut down.
     qmlRegisterType<Purple::DownloadManager>( "purple.downloadManager", 1, 0,"CppDownloadManager" );
     qmlRegisterType<Purple::DownloadsDataModel>( "purple.model", 1, 0, "CppDataModel" );
-    qmlRegisterType<Purple::YTManager>( "purple.youtube", 1, 0, "CppYoutube" );
-    qmlRegisterType<Purple::YTDataManager>( "purple.searchModel", 1, 0, "CppSearchDataModel" );
+    qmlRegisterType<Purple::YTDataManager> ( "purple.searchModel", 1, 0, "SearchDataModel" );
 
+    // Create scene document from main.qml asset, the parent is set
+    // to ensure the document gets destroyed properly at shut down.
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
 
     QDeclarativePropertyMap *map = new QDeclarativePropertyMap;

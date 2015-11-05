@@ -2,7 +2,6 @@ import bb.cascades 1.2
 import bb.system 1.0
 import bb.data 1.0
 import purple.searchModel 1.0
-import purple.youtube 1.0
 
 TabbedPane {
     id: root
@@ -16,11 +15,9 @@ TabbedPane {
         }
     }
     attachedObjects: [
-        ActivityIndicator {
-            id: loadingIndicator
-            running: false
+        SearchDataModel {
+            id: youtubeManager
         },
-        
         SystemDialog {
             id: errorDialog
             title: "Error"
@@ -77,22 +74,17 @@ TabbedPane {
         imageSource: "asset:///ad_search.png"
         
         function searchResultObtained(result) {
-            loadingIndicator.running = false
-            loadingIndicator.stop()
             resultDropDown.visible = true
-            
+        
         }
         
         function errorGotten(error) {
-            loadingIndicator.stop()
             errorDialog.body = error
             errorDialog.show()
         }
         
         function processRequest(query)
         {
-            loadingIndicator.running = true
-            loadingIndicator.start()            
             youtubeManager.search( query )
         }
         
@@ -241,51 +233,64 @@ TabbedPane {
                     }
                 }
                 
-                Container {
-                    ListView {
-                        id: listView
-                        dataModel: searchDataModel
-                        listItemComponents: [
-                            ListItemComponent {
-                                type: ""
-                                Header {
-                                    title: ListItem.value
+                ListView {
+                    id: listView
+                    dataModel: youtubeManager
+                    listItemComponents: [
+                        ListItemComponent {
+                            type: "searching"
+                            Container {
+                                layout: StackLayout {
+                                    orientation: LayoutOrientation.LeftToRight
                                 }
-                            },
-                            ListItemComponent {
-                                type: ""
-                                StandardListItem {
-                                    title: ListItem.title
-                                    imageSource: ListItem.thumbnails
-                                    status: ListItem.owner
-                                    description: ListItem.description
+                                Container {
+                                    layout: DockLayout {
+                                    }
+                                    layoutProperties: StackLayoutProperties {
+                                        spaceQuota: 1
+                                    }
+                                    ActivityIndicator {
+                                        id: myIndicator
+                                        horizontalAlignment: HorizontalAlignment.Center
+                                    }
+                                    onCreationCompleted: {
+                                        myIndicator.start();
+                                    }
                                 }
                             }
-                        ]
+                        },
+                        ListItemComponent {
+                            type: "result"
+                            Header {
+                                title: ListItem.value
+                            }
+                        },
+                        ListItemComponent {
+                            type: "result"
+                            StandardListItem {
+                                title: ListItem.title
+                                imageSource: ListItem.thumbnails
+                                status: ListItem.owner
+                                description: ListItem.description
+                            }
+                        }
+                    ]
+                    
+                    function itemType( data, indexPath )
+                    {
+                        if( data.searching == true ){
+                            return "searching"
+                        } else {
+                            return "result"
+                        }
                     }
                 }
             }
         }
         onCreationCompleted: {
             youtubeManager.setProjectFile( "app/data/assets/settings.json" );
+            youtubeManager.error.connect(homeTab.errorGotten)
         }
-        attachedObjects: [
-            CppSearchDataModel {
-                id: searchDataModel
-                onError: {
-                    homeTab.errorGotten( what )
-                }
-            },
-            CppYoutube {
-                id: youtubeManager
-                onError: {
-                    homeTab.errorGotten( what )
-                }
-                onFinished: {
-                    searchDataModel.setSource( data )
-                }
-            }
-        ]
     }
     
     Tab {
@@ -314,13 +319,13 @@ TabbedPane {
                     switch ( value ){
                         case 0: break;
                         case 1: {
-                            downloadManager.showCompletedDownloads(); 
-                            break;
+                                downloadManager.showCompletedDownloads(); 
+                                break;
                         }
-                        case 2: {
+                    case 2: {
                             downloadManager.showStoppedDownloads();
                             break;
-                        }
+                    }
                     }
                 }
                 id: downloadsTitleBar

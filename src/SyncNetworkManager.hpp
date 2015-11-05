@@ -25,7 +25,8 @@ namespace Purple
         QList<QNetworkReply*> m_requestQueue;
 	public slots:
 		Q_SLOT void onFinished();
-		Q_SLOT void onError( QNetworkReply::NetworkError );
+        Q_SLOT void onError( QNetworkReply::NetworkError );
+        Q_SLOT void onError( QNetworkAccessManager::NetworkAccessibility );
     signals:
         void networkError( QString const & what );
         void errorOccurred( QString const & what );
