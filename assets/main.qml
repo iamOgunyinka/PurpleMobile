@@ -43,6 +43,13 @@ TabbedPane {
                 }
                 content: MySettings {
                     id: mySheetSettings
+                    
+                    appTheme: youtubeManager.appTheme
+                    safeSearch: youtubeManager.safeSearch
+                    fileExist: youtubeManager.fileExistPolicy
+                    thumbnails: youtubeManager.thumbnailsQuality
+                    maxResults: youtubeManager.maxResult
+                    
                     onAppThemeChanged: {
                         youtubeManager.appTheme = value
                     }
@@ -54,6 +61,9 @@ TabbedPane {
                     }
                     onMaxResultChanged: {
                         youtubeManager.maxResult = value
+                    }
+                    onSafeSearchChanged: {
+                        youtubeManager.safeSearch = value
                     }
                 }
                 actions: [
@@ -232,64 +242,66 @@ TabbedPane {
                         }
                     }
                 }
-                
                 ListView {
                     id: listView
                     dataModel: youtubeManager
                     listItemComponents: [
                         ListItemComponent {
-                            type: "searching"
-                            Container {
-                                layout: StackLayout {
-                                    orientation: LayoutOrientation.LeftToRight
-                                }
-                                Container {
-                                    layout: DockLayout {
-                                    }
-                                    layoutProperties: StackLayoutProperties {
-                                        spaceQuota: 1
-                                    }
-                                    ActivityIndicator {
-                                        id: myIndicator
-                                        horizontalAlignment: HorizontalAlignment.Center
-                                    }
-                                    onCreationCompleted: {
-                                        myIndicator.start();
-                                    }
-                                }
-                            }
-                        },
-                        ListItemComponent {
-                            type: "result"
+                            type: "title"
                             Header {
-                                title: ListItem.value
+                                title: "Results"
                             }
                         },
                         ListItemComponent {
                             type: "result"
                             StandardListItem {
-                                title: ListItem.title
-                                imageSource: ListItem.thumbnails
-                                status: ListItem.owner
-                                description: ListItem.description
+                                title: ListItemData.title
+                                imageSource: ListItemData.thumbnails
+                                status: ListItemData.owner
+                                description: ListItemData.details
+                                
+                                contextActions: [
+                                    ActionSet {
+                                        ActionItem {
+                                            title: "Downloads"
+                                            onTriggered: {
+                                                console.log( "Downloaded" );
+                                            }
+                                        }
+                                    },
+                                    ActionSet {
+                                        ActionItem {
+                                            title: "Details"
+                                            onTriggered: {
+                                                console.log( "Details" )
+                                            }
+                                        }
+                                    },
+                                    ActionSet {
+                                        ActionItem {
+                                            title: "Copy URL"
+                                            onTriggered: {
+                                                console.log( "URL copied" )
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         }
                     ]
-                    
                     function itemType( data, indexPath )
                     {
-                        if( data.searching == true ){
-                            return "searching"
-                        } else {
-                            return "result"
-                        }
+                        if( indexPath.length == 2 ) return "result"
+                        if( indexPath.length == 1 ) return "title"
+                        return ""
                     }
                 }
             }
         }
+        
         onCreationCompleted: {
             youtubeManager.setProjectFile( "app/data/assets/settings.json" );
-            youtubeManager.error.connect(homeTab.errorGotten)
+            youtubeManager.error.connect( homeTab.errorGotten )
         }
     }
     

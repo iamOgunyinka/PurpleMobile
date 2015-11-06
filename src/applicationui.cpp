@@ -73,9 +73,9 @@ void ApplicationUI::writeSettingsFile()
                 << "\"apiKey\": \"AIzaSyBhl_zBnEEv_xiIukkMpz8ayoiwT1UdfQk\",\n"
                 << "\"maxResult\": 40,\n"
                 << "\"youtube_url\": \"https://www.googleapis.com/youtube/v3/search/?part=snippet\",\n"
-                << "\"appTheme\": \"light\",\n"
-                << "\"safeSearch\": \"moderate\",\n"
-                << "\"thumbnailsQuality\": \"default\",\n"
+                << "\"appTheme\": \"Light\",\n"
+                << "\"safeSearch\": \"Moderate\",\n"
+                << "\"thumbnailsQuality\": \"Default\",\n"
                 << "\"existsAction\": \"Overwrite\"\n"
                 << "}\n" << "]\n";
         textFile.close();

@@ -65,9 +65,6 @@ namespace Purple
         Q_INVOKABLE void setProjectFile( QString const & location );
 
     private:
-
-        void removeLoading();
-
         int maxResult();
         void setMaxResult( int value );
 
@@ -87,7 +84,6 @@ namespace Purple
         Q_INVOKABLE bool hasChildren( QVariantList const & indexPath );
         Q_INVOKABLE int childCount( QVariantList const & indexPath );
         Q_INVOKABLE QVariant data( QVariantList const & indexPath );
-
         Q_INVOKABLE void removeItem( QVariantList const & indexPath );
 
     private slots:
@@ -100,8 +96,6 @@ namespace Purple
         QString       m_data;
     signals:
         void error( QString const & message );
-        void dataChanged( QString const & data );
-        void searching();
     };
 } /* namespace Purple */
 

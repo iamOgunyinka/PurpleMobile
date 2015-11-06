@@ -26,6 +26,12 @@ Container {
         else safeSearchOption.setSelectedIndex(2)
         
         sliderMaxResult.setValue( maxResults )
+
+        var fileExistPolicyIndex = ( fileExist == "Cancel" ? 0 : ( fileExist == "Overwrite" ? 1 : 2 ) )
+        fileExistsOption.setSelectedIndex( fileExistPolicyIndex )
+        
+        var thumbnailsQualityOptionIndex = ( thumbnails == "Default" ? 0 : ( thumbnails == "Medium" ? 1 : 2 ) )
+        thumbnailsQualityOption.setSelectedIndex( thumbnailsQualityOptionIndex )
     }
     
     DropDown {

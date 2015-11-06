@@ -46,15 +46,11 @@ namespace Purple
                     << "\"apiKey\": \"AIzaSyBhl_zBnEEv_xiIukkMpz8ayoiwT1UdfQk\",\n"
                     << "\"maxResult\": " << m_projectFileHandler->apiInfo().maxResults() << ",\n"
                     << "\"youtube_url\": \"https://www.googleapis.com/youtube/v3/search/?part=snippet\",\n"
-                    << "\"appTheme\": \"" << m_projectFileHandler->appSettings().appTheme().toLower() << "\",\n"
-                    << "\"safeSearch\": \"" << m_projectFileHandler->appSettings().safeSearch().toLower() << "\",\n"
-                    << "\"thumbnailsQuality\": \"" << m_projectFileHandler->appSettings().thumbnailsQuality().toLower() << "\",\n"
+                    << "\"appTheme\": \"" << m_projectFileHandler->appSettings().appTheme() << "\",\n"
+                    << "\"safeSearch\": \"" << m_projectFileHandler->appSettings().safeSearch() << "\",\n"
+                    << "\"thumbnailsQuality\": \"" << m_projectFileHandler->appSettings().thumbnailsQuality() << "\",\n"
                     << "\"existsAction\": \"" << m_projectFileHandler->appSettings().fileExistencePolicy() << "\"\n"
                     << "}\n" << "]\n";
-            textFile.close();
-            textFile.open( QIODevice::ReadOnly );
-            QTextStream in( &textFile );
-            qDebug() << in.readAll();
             textFile.close();
         }
     }
@@ -66,7 +62,6 @@ namespace Purple
         youtube_query += "&maxResults=" + QString::number( m_projectFileHandler->apiInfo().maxResults() );
         youtube_query += "&key=" + m_projectFileHandler->apiInfo().apiKey();
 
-        qDebug() << "Youtube query is " << youtube_query;
         m_networkManager->sendRequest( youtube_query );
     }
 
@@ -125,18 +120,6 @@ namespace Purple
     void YTDataManager::search( QString const & searchString )
     {
         m_ytManager->search( searchString );
-        QVariantMap lmap;
-        lmap["searching"] = true;
-        m_videoResultList.append( lmap );
-        emit searching();
-    }
-
-    void YTDataManager::removeLoading()
-    {
-        m_videoResultList.removeLast();
-        QVariantList indexPath;
-        indexPath.append( m_videoResultList.size() );
-        emit itemRemoved( indexPath );
     }
 
     void YTDataManager::setProjectFile( QString const & location )
@@ -155,14 +138,16 @@ namespace Purple
         {
             m_data = data;
             load( m_data );
-            emit dataChanged( m_data );
         }
     }
 
     void YTDataManager::load( QString const & buffer )
     {
-        removeLoading();
         m_videoResultList.clear();
+
+        QVariantList indexPath;
+        indexPath.append( m_videoResultList.size() );
+        emit itemRemoved( indexPath );
 
         bb::data::JsonDataAccess jda;
         QVariantMap rootMap = jda.loadFromBuffer( buffer ).toMap();
@@ -179,18 +164,23 @@ namespace Purple
             for( int i = 0; i != results.size(); ++i ){
                 QVariantMap eachItem = results[i].toMap();
                 QVariantMap item;
+
                 item["id"] = eachItem["id"].toMap()["videoId"].toString();
-                item["title"] = eachItem["title"].toString();
-                item["thumbnails"] = eachItem["thumbnails"].toMap()
-                                                             [ "default" ].toMap()
-                                                             ["url"].toString();
-                item["owner"] = eachItem["channelTitle"].toString();
+
+                if( item["id"] == QString("") ){ //we got a playlist here
+                    item["id"] = eachItem["id"].toMap()["playlist"].toString();
+                }
+                QVariantMap map = eachItem["snippet"].toMap();
+                item["title"] = map["title"].toString();
+                item["owner"] = map["channelTitle"].toString();
+                item["details"] = map["description"].toString();
+                item["thumbnails"] = map["thumbnails"].toMap()[ "default" ].toMap()["url"].toString();
                 m_videoResultList.append( item );
             }
         }
 
         emit itemsChanged( bb::cascades::DataModelChangeType::AddRemove, QSharedPointer<bb::cascades::DataModel::IndexMapper>(
-                new MyIndexMapper( 0, m_videoResultList.size(), false )));
+                new MyIndexMapper( m_videoResultList.size(), m_videoResultList.size(), false )));
     }
 
     int     YTDataManager::maxResult()  { return m_ytManager->projectHandler()->apiInfo().maxResults(); }
@@ -249,19 +239,15 @@ namespace Purple
 
     void YTDataManager::removeItem( QVariantList const & indexPath )
     {
-        Q_UNUSED(indexPath);
+        if( indexPath.size() == 2 ){
+            m_videoResultList.removeAt( indexPath.at(1).toInt() );
+            emit itemRemoved( indexPath );
+        }
     }
 
     QVariant YTDataManager::data( QVariantList const & indexPath )
     {
-        if( indexPath.size() == 1 ){
-            if( indexPath.at(0).toInt() == 0 ){
-                QVariantMap header;
-                header["value"] = "Result";
-                return header;
-            }
-        } else if( indexPath.size() == 2 ) {
-            qDebug() << "Title: " << m_videoResultList.at( indexPath.at(1).toInt()).toMap()["title"].toString();
+        if( indexPath.size() == 2 ) {
             return m_videoResultList.at( indexPath.at( 1 ).toInt() );
         }
         return QVariant();
