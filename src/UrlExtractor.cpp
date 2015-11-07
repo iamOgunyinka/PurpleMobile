@@ -100,21 +100,21 @@ namespace Purple
 
             return reply->readAll();
         }
-
+        /*
         inline QVariantMap parseQueryString( QByteArray const & data )
         {
             QUrlQuery urlQuery( data );
-            QList<QPair<QString, QString>> list = urlQuery.queryItems();
+            QList<QPair<QString, QString> > list = urlQuery.queryItems();
 
-            QVariantMap map{};
+            QVariantMap map;
             if( !list.isEmpty() ){
-                for( auto const & m: list ){
-                    map.insert( m.first, m.second );
+                for( QList<QPair<QString, QString> >::iterator m = list.begin(); m != list.end(); ++m ){
+                    map.insert( m->first, m->second );
                 }
             }
             return map;
         }
-
+        */
     }
     UrlExtractor::UrlExtractor()
     {

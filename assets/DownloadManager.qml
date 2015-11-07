@@ -30,16 +30,15 @@ Container {
             listItemComponents: [
                 ListItemComponent {
                     id: listItem
-                    type: "all"
+                    type: ""
                     CustomListItem {
                         contextActions: [
                             ActionSet {
                                 actions: [
                                     DeleteActionItem {
                                         onTriggered: {
-                                            var myView = listItem.ListItem.view
-                                            var dataModel = myView.dataModel
-                                            var indexPath = myView.selected()
+                                            var dataModel_ = listView.dataModel
+                                            var indexPath = listView.selected()
                                             dataModel.removeItem( indexPath )
                                         }
                                     },
