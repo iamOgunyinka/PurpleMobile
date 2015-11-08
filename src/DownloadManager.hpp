@@ -41,19 +41,17 @@ namespace Purple
     {
         Q_OBJECT
 
-        Q_PROPERTY( QQueue<Downloads> downloads READ downloads CONSTANT )
     public:
         DownloadManager( QObject *parent = 0 );
         virtual ~DownloadManager();
 
-
-        QQueue<Downloads>           downloads() const;
-        Q_INVOKABLE void            startDownload( QString const & url );
-        Q_INVOKABLE void            stopDownload( QString const & url );
-        Q_INVOKABLE void            pauseDownload( QString const & url );
-        Q_INVOKABLE void            resumeDownload( QString const & url, QString const & path = QString() );
+        void            startDownload( QString const & url );
+        void            stopDownload( QString const & url );
+        void            pauseDownload( QString const & url );
+        void            resumeDownload( QString const & url, QString const & path = QString() );
     private:
         void            setupDownloadManager();
+        void            openDownloadList();
         void            startDownloadImpl( QString const & url, QString const & path = QString() );
         void            stopDownloadImpl( QString const & url, bool pause );
         bool            hasRedirect( QNetworkReply *reply );
@@ -69,15 +67,16 @@ namespace Purple
         QString                         m_userAgent;
         QQueue<Downloads>               m_downloadQueue;
         QNetworkAccessManager           m_networkManager;
-        QList<Downloads>                m_completedList;
+        QVariantList                    m_downloadList;
         QHash<QNetworkReply*, Downloads> m_downloadHash;
         QHash<QString, QNetworkReply*>  m_urlHash;
-    private Q_SLOTS:
+    private slots:
         void startNextDownload();
         void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
         void downloadReadyRead();
         void downloadFinished();
         void downloadError(QNetworkReply::NetworkError);
+        void updateDownload( QString const &url, qint64 actualReceived, qint64 actualTotal, int percent, double speed, QString const & unit  );
     signals:
         void        status( const QString &url, const QString &title, const QString &message, const QString &data);
         void        progress( QString const &url, qint64, qint64, int, double, QString const & unit );

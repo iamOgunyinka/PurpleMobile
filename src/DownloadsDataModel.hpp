@@ -11,26 +11,27 @@
 #include <bb/cascades/DataModel>
 #include <bb/data/JsonDataAccess>
 #include <QStringList>
+#include "DownloadManager.hpp"
 
 namespace Purple
 {
-
     class DownloadsDataModel: public bb::cascades::DataModel
     {
         Q_OBJECT
 
-        Q_PROPERTY( QString source READ source WRITE setSource NOTIFY sourceChanged )
-        Q_PROPERTY( QVariantList downloadsList READ downloadsList )
     public:
         DownloadsDataModel( QObject *parent = 0 );
         virtual ~DownloadsDataModel();
-        Q_INVOKABLE             void reload();
+
+        Q_INVOKABLE void            startDownload( QString const & url );
+        Q_INVOKABLE void            stopDownload( QString const & url );
+        Q_INVOKABLE void            pauseDownload( QString const & url );
+        Q_INVOKABLE void            resumeDownload( QString const & url, QString const & path = QString() );
+
     private:
-        void                    setSource( QString const & );
-        QString                 source() const;
         void                    load( QString const & filename );
 
-        QString                 m_source;
+        DownloadManager        *m_downloadManager;
         QVariantList            m_downloadList;
     public slots:
         QVariantList            downloadsList();
@@ -39,11 +40,15 @@ namespace Purple
         Q_INVOKABLE QVariant    data( QVariantList const & indexPath );
         Q_INVOKABLE QString     itemType( QVariantList const & indexPath );
         Q_INVOKABLE void        removeItem( QVariantList const & indexPath );
-    signals:
-        void    sourceChanged( QString const &newSource );
-        void    error( QString const & errorMessage );
-    };
 
+        void onStatus( QString const & url, QString const & title, QString const &message, QString const &data );
+        void onFinished( QString const & url, QString const & destination );
+        void onNewDownloadAdded();
+
+    signals:
+        void    error( QString const & errorMessage );
+        void    status( QString const & url, QString const & message );
+    };
 } /* namespace Purple */
 
 #endif /* DOWNLOADSDATAMODEL_HPP_ */

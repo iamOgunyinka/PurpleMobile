@@ -29,7 +29,6 @@ ApplicationUI::ApplicationUI() :
     onSystemLanguageChanged();
     writeSettingsFile();
 
-    qmlRegisterType<Purple::DownloadManager>( "purple.downloadManager", 1, 0,"CppDownloadManager" );
     qmlRegisterType<Purple::DownloadsDataModel>( "purple.model", 1, 0, "CppDataModel" );
     qmlRegisterType<Purple::YTDataManager> ( "purple.searchModel", 1, 0, "SearchDataModel" );
 

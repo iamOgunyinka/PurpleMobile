@@ -1,7 +1,6 @@
 #include <src/DownloadManager.hpp>
 #include <QTimer>
 #include <QUuid>
-#include <QDebug>
 #include <bb/data/JsonDataAccess.hpp>
 
 namespace Purple
@@ -9,11 +8,22 @@ namespace Purple
     DownloadManager::DownloadManager( QObject *parent ): QObject( parent )
     {
         setupDownloadManager();
+        openDownloadList();
     }
 
     DownloadManager::~DownloadManager()
     {
 
+    }
+
+    void DownloadManager::openDownloadList()
+    {
+        bb::data::JsonDataAccess jda;
+        m_downloadList = jda.load( "app/data/assets/download_queue.json" ).toList();
+        if( !jda.hasError() ){
+            emit status( "", "Error", "Fatal Error", "Unable to open download list" );
+            return;
+        }
     }
 
     void DownloadManager::startDownload( QString const & url )
@@ -29,24 +39,22 @@ namespace Purple
 
     void DownloadManager::writeDownloadToFile( QString const & url )
     {
-        bb::data::JsonDataAccess jda;
-        QVariantList list = jda.load( "app/data/assets/download_queue.json" ).toList();
-        if( !jda.hasError() ){
-            Downloads item = m_downloadHash[ m_urlHash[url] ];
-            QVariantMap newDownload;
-            newDownload[ "title" ] = item.m_file->fileName();
-            newDownload[ "url"] = item.m_url;
-            newDownload["thumbnail"] = QString( "app/data/assets/downloads_icon.png" );
-            newDownload["status"] = "incomplete";
-            newDownload["percentage"] = 0;
+        Downloads item = m_downloadHash[ m_urlHash[url] ];
+        QVariantMap newDownload;
+        newDownload[ "title" ] = item.m_file->fileName();
+        newDownload[ "url"] = item.m_url;
+        newDownload["status"] = "";
+        newDownload["percentage"] = 0;
+        newDownload["speed"] = "";
 
-            list.append( newDownload );
-            jda.save( list, "app/data/assets/download_queue.json" );
-            if( jda.hasError() ){
-                qDebug() << "Unable to save new JSON file";
-            }
-            emit newDownloadAdded();
+        m_downloadList.append( newDownload );
+
+        bb::data::JsonDataAccess jda;
+        jda.save( m_downloadList, "app/data/assets/download_queue.json" );
+        if( jda.hasError() ){
+            qDebug() << "Unable to save new download to file";
         }
+        emit newDownloadAdded();
     }
 
     void DownloadManager::startDownloadImpl( QString const & url, QString const & path )
@@ -79,7 +87,6 @@ namespace Purple
         return QUrl( url, QUrl::StrictMode ).isValid();
     }
 
-    QQueue<Downloads> DownloadManager::downloads() const { return m_downloadQueue; }
     void DownloadManager::stopDownload( QString const & url )
     {
         stopDownloadImpl( url, false );
@@ -196,8 +203,18 @@ namespace Purple
             Downloads item = m_downloadHash[reply];
 
             qint64 actualReceived = item.m_tempSize + bytesReceived;
-            qint64 actualTotal = item.m_tempSize + bytesTotal;
+            if( actualReceived == 0 || item.m_tempSize == 0 ){
+                emit status( "", "Error", "Unable to start/continue download", "" );
+                return;
+            }
+
             double speed = actualReceived * 1000.0 / item.m_time.elapsed();
+            qint64 actualTotal = item.m_tempSize + bytesTotal;
+
+            if( actualTotal == 0 ){
+                emit status( "", "Error", "Unable to start/continue download", "" );
+                return;
+            }
             QString unit;
             if (speed < 1024) {
                 unit = "bytes/sec";
@@ -211,9 +228,31 @@ namespace Purple
             int percent = actualReceived * 100 / actualTotal;
 
             emit progress( item.m_url, actualReceived, actualTotal, percent, speed, unit );
+            updateDownload( item.m_url, actualReceived, actualTotal, percent, speed, unit );
         }
     }
 
+    void DownloadManager::updateDownload( QString const &url, qint64 actualReceived, qint64 actualTotal, int percent,
+            double speed, QString const & unit  )
+    {
+        for( int i = 0; i != m_downloadList.size(); ++i )
+        {
+            QVariantMap item = m_downloadList[i].toMap();
+            if( url == item["url"] ){
+                item["status"] = QString::number( actualReceived ) + "bytes of " + QString::number( actualTotal ) + "bytes";
+                item["percentage"] = percent;
+                item["speed"] = QString::number( speed ) + unit;
+                m_downloadList[i] = item;
+                break;
+            }
+        }
+
+        bb::data::JsonDataAccess jda;
+        jda.save( m_downloadList, "app/data/asset/download_queue.json" );
+        if( jda.hasError() ){
+            qDebug() << "Unable to update file: " << url;
+        }
+    }
     void DownloadManager::downloadReadyRead()
     {
         QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
@@ -255,8 +294,9 @@ namespace Purple
             if ( QFile::exists( item.m_destFile))
                 QFile::remove( item.m_destFile );
             QFile::rename( item.m_tempFile, item.m_destFile );
-            m_completedList.append(item);
-
+            /***********************
+            m_downloadList.append(item);
+            ***********************/
             emit status(item.m_url, "Complete", "Download file completed", item.m_url);
             emit finished( item.m_url, item.m_destFile );
 

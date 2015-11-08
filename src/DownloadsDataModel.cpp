@@ -6,41 +6,82 @@
  */
 
 #include <src/DownloadsDataModel.hpp>
+#include "MyIndexMapper.hpp"
 
 namespace Purple
 {
 
-    DownloadsDataModel::DownloadsDataModel( QObject *parent ): bb::cascades::DataModel( parent )
+    DownloadsDataModel::DownloadsDataModel( QObject *parent ): bb::cascades::DataModel( parent ),
+            m_downloadManager( new DownloadManager( this ) )
     {
-
+        QObject::connect( m_downloadManager, SIGNAL(status( QString, QString, QString, QString )),
+                this, SLOT(onStatus( QString, QString, QString, QString )) );
+        QObject::connect( m_downloadManager, SIGNAL( newDownloadAdded() ), this, SLOT( onNewDownloadAdded() ) );
+        QObject::connect( m_downloadManager, SIGNAL( finished(QString, QString) ), this, SLOT( onFinished(QString, QString) ) ) ;
+        QObject::connect( m_downloadManager, SIGNAL( downloadProgress(QString, qint64, qint64, int, double, QString )),
+                this, SLOT( onNewDownloadAdded() ) );
     }
 
     DownloadsDataModel::~DownloadsDataModel()
     {
     }
 
-    QString DownloadsDataModel::source() const { return m_source; }
+    void DownloadsDataModel::onNewDownloadAdded()
+    {
+        load( "download_queue.json" );
+    }
 
-    void DownloadsDataModel::setSource( QString const & newSource ) {
-        if( newSource != m_source ){
-            m_source = newSource;
-            load( newSource );
-            emit sourceChanged( newSource );
+    void DownloadsDataModel::startDownload( QString const & url )
+    {
+        m_downloadManager->startDownload( url );
+    }
+
+    void DownloadsDataModel::stopDownload( QString const & url )
+    {
+        m_downloadManager->stopDownload( url );
+    }
+
+    void DownloadsDataModel::resumeDownload( QString const & url, QString const & path )
+    {
+        m_downloadManager->resumeDownload( url, path );
+    }
+
+    void DownloadsDataModel::pauseDownload( QString const & url )
+    {
+        m_downloadManager->pauseDownload( url );
+    }
+
+    void DownloadsDataModel::onStatus( QString const & url, QString const & title, QString const & message, QString const & )
+    {
+        if( title == "Download started" || title == "Download completed" ){
+            emit status( url, message );
+        } else if( title == "Error" || title == "Cancel" ){
+            emit error( message );
+        } else {
+            emit status( url, message );
         }
+    }
+
+    void DownloadsDataModel::onFinished( QString const& url, QString const & )
+    {
+        emit status( "Completed", url );
     }
 
     void DownloadsDataModel::load( QString const & sourceFile )
     {
         bb::data::JsonDataAccess jda;
-        QVariantList list = jda.load( QDir::currentPath() + "/app/data/asset/" + sourceFile ).toList();
+        QVariantList list = jda.load( "app/data/asset/" + sourceFile ).toList();
 
         if( jda.hasError() ){
             emit error( jda.error().errorMessage() );
             return;
         }
+        m_downloadList = list;
         for( int i = 0; i != list.size(); ++i ){
             m_downloadList.append( list[i].toMap() );
         }
+        emit itemsChanged( bb::cascades::DataModelChangeType::AddRemove, QSharedPointer<bb::cascades::DataModel::IndexMapper>(
+                new MyIndexMapper( m_downloadList.size(), m_downloadList.size(), false )));
     }
 
     bool DownloadsDataModel::hasChildren( QVariantList const & indexPath )
@@ -81,9 +122,10 @@ namespace Purple
         return QVariant();
     }
 
-    QString DownloadsDataModel::itemType( QVariantList const & )
+    QString DownloadsDataModel::itemType( QVariantList const & indexPath )
     {
-        return QString( "all" );
+        if( indexPath.size() == 2 ) return "all";
+        return QString();
     }
 
     QVariantList DownloadsDataModel::downloadsList() { return m_downloadList; }
@@ -94,12 +136,5 @@ namespace Purple
             m_downloadList.removeAt( indexPath.at(1).toInt() );
             emit itemRemoved( indexPath );
         }
-    }
-
-    void DownloadsDataModel::reload()
-    {
-        QString temp_source = m_source;
-        m_source.clear();
-        setSource( temp_source );
     }
 } /* namespace Purple */

@@ -5,11 +5,10 @@
 #include <bb/cascades/DataModel>
 #include "SyncNetworkManager.hpp"
 #include "ProjectFile.hpp"
+#include "MyIndexMapper.hpp"
 
 namespace Purple
 {
-    class YTDataManager;
-
     class YTManager: public QObject
     {
         Q_OBJECT
@@ -34,18 +33,6 @@ namespace Purple
         void error( QString const & what );
         void finished( QString const & data );
         void sourceChanged( QString const & );
-    };
-
-    class MyIndexMapper: public bb::cascades::DataModel::IndexMapper
-    {
-    public:
-        MyIndexMapper( int index, int count, bool deleted );
-        bool newIndexPath( QVariantList *pNewIndexPath, int *pReplacementIndex, const QVariantList &oldIndexPath ) const;
-
-    private:
-        int m_index;
-        int m_count;
-        bool m_deleted;
     };
 
     class YTDataManager: public bb::cascades::DataModel

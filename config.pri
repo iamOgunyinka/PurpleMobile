@@ -55,6 +55,7 @@ config_pri_source_group1 {
     SOURCES += \
         $$quote($$BASEDIR/src/DownloadManager.cpp) \
         $$quote($$BASEDIR/src/DownloadsDataModel.cpp) \
+        $$quote($$BASEDIR/src/MyIndexMapper.cpp) \
         $$quote($$BASEDIR/src/ProjectFile.cpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.cpp) \
         $$quote($$BASEDIR/src/UrlExtractor.cpp) \
@@ -65,6 +66,7 @@ config_pri_source_group1 {
     HEADERS += \
         $$quote($$BASEDIR/src/DownloadManager.hpp) \
         $$quote($$BASEDIR/src/DownloadsDataModel.hpp) \
+        $$quote($$BASEDIR/src/MyIndexMapper.hpp) \
         $$quote($$BASEDIR/src/ProjectFile.hpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.hpp) \
         $$quote($$BASEDIR/src/UrlExtractor.hpp) \

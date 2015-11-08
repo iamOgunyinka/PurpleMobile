@@ -1,7 +1,6 @@
 import bb.cascades 1.2
 import bb.data 1.0
 import bb.system 1.2
-import purple.downloadManager 1.0
 import purple.model 1.0
 
 Container {
@@ -12,8 +11,8 @@ Container {
         signal finished();
         
         attachedObjects: [
-            CppDownloadManager {
-                id: myDownloadManager
+            CppDataModel {
+                id: myDataManager
             },
             SystemToast {
                 id: systemToast
@@ -22,15 +21,11 @@ Container {
         
         ListView {
             id: listView
-            dataModel: CppDataModel {
-                id: dataModel
-                source: "download_queue.json"
-            }
             
             listItemComponents: [
                 ListItemComponent {
                     id: listItem
-                    type: ""
+                    type: "all"
                     CustomListItem {
                         contextActions: [
                             ActionSet {
@@ -39,7 +34,7 @@ Container {
                                         onTriggered: {
                                             var dataModel_ = listView.dataModel
                                             var indexPath = listView.selected()
-                                            dataModel.removeItem( indexPath )
+                                            myDataManager.removeItem( indexPath )
                                         }
                                     },
                                     ActionItem {
@@ -51,10 +46,10 @@ Container {
                                             var m_url = selectedDownload["url"];
                                             
                                             if( title == "Pause" ){                                            
-                                                myDownloadManager.pauseDownload( m_url )
+                                                myDataManager.pauseDownload( m_url )
                                                 title = "Resume"
                                             } else {
-                                                myDownloadManager.resumeDownload( m_url )
+                                                myDataManager.resumeDownload( m_url )
                                                 title = "Pause"
                                             }
                                         }
@@ -67,7 +62,7 @@ Container {
                                             var selectedDownload = dataModel.data( indexPath )
                                             var m_url = selectedDownload["url"];
                                             
-                                            myDownloadManager.startDownload( m_url )
+                                            myDataManager.startDownload( m_url )
                                         }
                                     }
                                 ]
@@ -81,7 +76,7 @@ Container {
                                 layoutProperties: StackLayoutProperties {
                                     spaceQuota: 1/6
                                 }
-                                imageSource: ListItemData.thumbnail
+                                imageSource: "asset:///downloads_icon.png"
                                 scalingMethod: ScalingMethod.AspectFit
                             }
                             Container {
@@ -98,20 +93,16 @@ Container {
                                     id: progressIndicator
                                     fromValue: 1
                                     toValue: 100
-                                    value: 5
+                                    value: ListItemData.percentage
                                 }
                                 Label {
                                     id: downloadStatus
+                                    text: ListItemData.status
                                     textStyle {
                                         fontStyle: FontStyle.Italic   
                                         fontSize: FontSize.XSmall
                                         color: Color.Blue
                                     }
-                                }
-                                Label {
-                                    id: urlKeeper
-                                    visible: false
-                                    text: ListItemData.url
                                 }
                             }
                         }
@@ -121,74 +112,34 @@ Container {
         }
     }
     onCreationCompleted: {
-        myDownloadManager.status.connect( downloadPageTab.status )
-        myDownloadManager.progress.connect( downloadPageTab.progress )
-        myDownloadManager.finished.connect( downloadPageTab.finished )
-        myDownloadManager.newDownloadAdded.connect( newDownloadAdded )
+        myDataManager.status.connect( downloadPageTab.status )
+        myDataManager.error.connect( downloadPageTab.error )
     }
     
-    function newDownloadAdded()
-    {
-        listView.dataModel.reload()
-        listView.setDataModel( dataModel )
-    }
-    
-    function finished( m_url, destination )
+    function status( m_url, destination )
     {
         systemToast.body = "Download Completed"
         systemToast.exec();
     }
     
-    function progress( m_url, actualReceived, actualTotal, percent, speed, unit )
-    {
-        progressIndicator.value = percent
-        var downloadProgressText = "Downloaded " + actualReceived + " of " + actualTotal
-        console.log( "Downloaded ", actualReceived, " with total speed of ", speed, unit )
-//        downloadStatus.text = downloadProgressText
-    }
-    
     //TODO
-    function status( m_url, title, status, data )
+    function error( message )
     {
-        if( title == "Download started" ){
-            systemToast.body = "Download started";
-            systemToast.exec();
-        } else if( title == "Error" ) {
-            console.log( "Error reported ", status )
-        } else if( title == "Cancel" ) {
-            systemToast.body = "Download already completed";
-            systemToast.exec()
-        } else { //Complete Download
-            console.log( "Download Completed" )
-        }
+        console.log( message )
     }
     
     function startNewDownload( url )
     {
-        myDownloadManager.startDownload( url );
+        myDataManager.startDownload( url );
     }
     
     // TODO
     function showCompletedDownloads()
     {
-        listView.clearSelection();
-        var allDownloads = listView.dataModel.downloadsList;
-        for( var i = 0; allDownloads.length; ++i ){
-            if( allDownloads[i]["status"] == "completed" ){
-                
-            }
-        }
     }
     
     //TODO
     function showStoppedDownloads()
     {
-        listView.clearSelection();
-        var allDownloads = listView.dataModel.downloadsList;
-        for( var i = 0; allDownloads.length; ++i ){
-            if( allDownloads[i]["status"] == "incomplete" ){
-                //
-            }
-        }
     }
 }
