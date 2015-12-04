@@ -33,12 +33,12 @@ namespace Purple
 
         DownloadManager        *m_downloadManager;
         QVariantList            m_downloadList;
+//        QString                 m_url;
     public slots:
         QVariantList            downloadsList();
         Q_INVOKABLE int         childCount( QVariantList const & indexPath );
         Q_INVOKABLE bool        hasChildren( QVariantList const & indexPath );
         Q_INVOKABLE QVariant    data( QVariantList const & indexPath );
-        Q_INVOKABLE QString     itemType( QVariantList const & indexPath );
         Q_INVOKABLE void        removeItem( QVariantList const & indexPath );
 
         void onStatus( QString const & url, QString const & title, QString const &message, QString const &data );

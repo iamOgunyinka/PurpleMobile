@@ -7,6 +7,7 @@
 
 #include <src/DownloadsDataModel.hpp>
 #include "MyIndexMapper.hpp"
+#include <QThread>
 
 namespace Purple
 {
@@ -18,12 +19,18 @@ namespace Purple
                 this, SLOT(onStatus( QString, QString, QString, QString )) );
         QObject::connect( m_downloadManager, SIGNAL( newDownloadAdded() ), this, SLOT( onNewDownloadAdded() ) );
         QObject::connect( m_downloadManager, SIGNAL( finished(QString, QString) ), this, SLOT( onFinished(QString, QString) ) ) ;
-        QObject::connect( m_downloadManager, SIGNAL( downloadProgress(QString, qint64, qint64, int, double, QString )),
+        QObject::connect( m_downloadManager, SIGNAL( progress(QString, qint64, qint64, int, double, QString )),
                 this, SLOT( onNewDownloadAdded() ) );
     }
 
     DownloadsDataModel::~DownloadsDataModel()
     {
+        QFile file( "data/assets/download_queue.json" );
+        if( file.open( QIODevice::ReadOnly ) ){
+            QTextStream text( &file );
+            qDebug() << text.readAll();
+            file.close();
+        }
     }
 
     void DownloadsDataModel::onNewDownloadAdded()
@@ -53,9 +60,7 @@ namespace Purple
 
     void DownloadsDataModel::onStatus( QString const & url, QString const & title, QString const & message, QString const & )
     {
-        if( title == "Download started" || title == "Download completed" ){
-            emit status( url, message );
-        } else if( title == "Error" || title == "Cancel" ){
+        if( title == "Error" || title == "Cancel" ){
             emit error( message );
         } else {
             emit status( url, message );
@@ -70,13 +75,14 @@ namespace Purple
     void DownloadsDataModel::load( QString const & sourceFile )
     {
         bb::data::JsonDataAccess jda;
-        QVariantList list = jda.load( "app/data/asset/" + sourceFile ).toList();
+        QVariantList list = jda.load( "data/assets/" + sourceFile ).toList();
 
         if( jda.hasError() ){
             emit error( jda.error().errorMessage() );
             return;
         }
-        m_downloadList = list;
+        qDebug() << "Loaded new file: " << QString ( "data/assets/%1").arg( sourceFile );
+
         for( int i = 0; i != list.size(); ++i ){
             m_downloadList.append( list[i].toMap() );
         }
@@ -120,12 +126,6 @@ namespace Purple
             return m_downloadList.at( indexPath.at( 1 ).toInt() );
         }
         return QVariant();
-    }
-
-    QString DownloadsDataModel::itemType( QVariantList const & indexPath )
-    {
-        if( indexPath.size() == 2 ) return "all";
-        return QString();
     }
 
     QVariantList DownloadsDataModel::downloadsList() { return m_downloadList; }

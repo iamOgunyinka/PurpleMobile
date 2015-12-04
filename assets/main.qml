@@ -164,18 +164,21 @@ TabbedPane {
                                 {
                                     searchButton.imageSource = "asset:///search.png"
                                     txtSearch.setHintText( "Search Video, Channels or Playlists" )
+                                    txtSearch.input.submitKey = SubmitKey.Search
                                     break;
                                 }
                             case 1:
                                 {
                                     searchButton.imageSource = "asset:///ad_search.png"
                                     txtSearch.setHintText( "Enter youtube URL" )
+                                    txtSearch.input.submitKey = SubmitKey.Search
                                     break;
                                 }
                             case 2:
                                 {
                                     searchButton.imageSource = "asset:///download.png"
                                     txtSearch.setHintText( "Enter URL for any website" )
+                                    txtSearch.input.submitKey = SubmitKey.Go
                                     break;
                                 }
                             default :

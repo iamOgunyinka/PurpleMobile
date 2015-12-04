@@ -40,7 +40,6 @@ config_pri_assets {
         $$quote($$BASEDIR/assets/MySettings.qml) \
         $$quote($$BASEDIR/assets/ad_search.png) \
         $$quote($$BASEDIR/assets/download.png) \
-        $$quote($$BASEDIR/assets/download_queue.json) \
         $$quote($$BASEDIR/assets/downloads_icon.png) \
         $$quote($$BASEDIR/assets/exit.png) \
         $$quote($$BASEDIR/assets/logo.png) \

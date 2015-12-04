@@ -25,8 +25,46 @@ Container {
             listItemComponents: [
                 ListItemComponent {
                     id: listItem
-                    type: "all"
+                    type: ""
                     CustomListItem {
+                        Container {
+                            layout: StackLayout {
+                                orientation: LayoutOrientation.LeftToRight
+                            }
+                            ImageView {
+                                layoutProperties: StackLayoutProperties {
+                                    spaceQuota: 1/6
+                                }
+                                imageSource: "asset:///downloads_icon.png"
+                                scalingMethod: ScalingMethod.AspectFit
+                            }
+                            Container {
+                                layout: StackLayout {
+                                    orientation: LayoutOrientation.TopToBottom
+                                }
+                                layoutProperties: StackLayoutProperties {
+                                    spaceQuota: 5/6
+                                }
+                                Label {
+                                    text: ListItemData.title
+                                }
+                                ProgressIndicator {
+                                    id: progressIndicator
+                                    fromValue: 1
+                                    toValue: 100
+                                    value: ListItemData.percentage
+                                }
+                                Label {
+                                    id: downloadStatus
+                                    text: ListItemData.status
+                                    textStyle {
+                                        fontStyle: FontStyle.Italic
+                                        fontSize: FontSize.XSmall
+                                        color: Color.Blue
+                                    }
+                                }
+                            }
+                        }
                         contextActions: [
                             ActionSet {
                                 actions: [
@@ -68,44 +106,6 @@ Container {
                                 ]
                             }
                         ]
-                        Container {
-                            layout: StackLayout {
-                                orientation: LayoutOrientation.LeftToRight
-                            }
-                            ImageView {
-                                layoutProperties: StackLayoutProperties {
-                                    spaceQuota: 1/6
-                                }
-                                imageSource: "asset:///downloads_icon.png"
-                                scalingMethod: ScalingMethod.AspectFit
-                            }
-                            Container {
-                                layout: StackLayout {
-                                    orientation: LayoutOrientation.TopToBottom
-                                }
-                                layoutProperties: StackLayoutProperties {
-                                    spaceQuota: 5/6
-                                }
-                                Label {
-                                    text: ListItemData.title
-                                }
-                                ProgressIndicator {
-                                    id: progressIndicator
-                                    fromValue: 1
-                                    toValue: 100
-                                    value: ListItemData.percentage
-                                }
-                                Label {
-                                    id: downloadStatus
-                                    text: ListItemData.status
-                                    textStyle {
-                                        fontStyle: FontStyle.Italic   
-                                        fontSize: FontSize.XSmall
-                                        color: Color.Blue
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             ]

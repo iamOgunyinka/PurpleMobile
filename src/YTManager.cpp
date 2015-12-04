@@ -36,7 +36,7 @@ namespace Purple
 
     void YTManager::saveSettings()
     {
-        QFile textFile( "app/data/assets/settings.json" );
+        QFile textFile( "data/assets/settings.json" );
         if( textFile.exists() )
         {
             textFile.open( QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate );

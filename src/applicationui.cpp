@@ -37,7 +37,7 @@ ApplicationUI::ApplicationUI() :
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
 
     QDeclarativePropertyMap *map = new QDeclarativePropertyMap;
-    map->insert( "settings", QVariant( QString( QDir::currentPath() + "/app/data/assets/settings.json" ) ));
+    map->insert( "settings", QVariant( "data/assets/settings.json" ) );
     qml->setContextProperty( "dirPath", map );
 
     // Create root object for the UI
@@ -60,9 +60,9 @@ void ApplicationUI::onSystemLanguageChanged()
 void ApplicationUI::writeSettingsFile()
 {
     QDir dir;
-    dir.mkpath( "app/data/assets" );
+    dir.mkpath( "data/assets/" );
 
-    QFile textFile( "app/data/assets/settings.json" );
+    QFile textFile( "data/assets/settings.json" );
     if( !textFile.exists() )
     {
         textFile.open( QIODevice::WriteOnly | QIODevice::Text );
