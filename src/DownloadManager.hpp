@@ -9,6 +9,7 @@
 #include <QNetworkReply>
 #include <QTime>
 #include <QHash>
+#include <bb/data/JsonDataAccess.hpp>
 
 namespace Purple
 {
@@ -44,6 +45,7 @@ namespace Purple
     public:
         DownloadManager( QObject *parent = 0 );
         virtual ~DownloadManager();
+        static          QString downloads_path;
 
         void            startDownload( QString const & url );
         void            stopDownload( QString const & url );
@@ -57,7 +59,6 @@ namespace Purple
         bool            hasRedirect( QNetworkReply *reply );
         void            writeDownloadToFile( QString const & url );
         bool            isValidUrl( QString const & url );
-        QNetworkReply*  startDownloadRequest( QNetworkRequest const & request );
         QString         saveFilename( QString const & url, bool &fileExists, QString & filename, bool &tempExists, bool isUrl );
     private:
         PartialDownloadPolicy           m_partialDownloadPolicy;
@@ -70,6 +71,7 @@ namespace Purple
         QVariantList                    m_downloadList;
         QHash<QNetworkReply*, Downloads> m_downloadHash;
         QHash<QString, QNetworkReply*>  m_urlHash;
+
     private slots:
         void startNextDownload();
         void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);

@@ -56,8 +56,10 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/DownloadsDataModel.cpp) \
         $$quote($$BASEDIR/src/MyIndexMapper.cpp) \
         $$quote($$BASEDIR/src/ProjectFile.cpp) \
+        $$quote($$BASEDIR/src/Stream.cpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.cpp) \
-        $$quote($$BASEDIR/src/UrlExtractor.cpp) \
+        $$quote($$BASEDIR/src/YTDownloadExtractor.cpp) \
+        $$quote($$BASEDIR/src/YTDownloadExtractor_test.cpp) \
         $$quote($$BASEDIR/src/YTManager.cpp) \
         $$quote($$BASEDIR/src/applicationui.cpp) \
         $$quote($$BASEDIR/src/main.cpp)
@@ -67,8 +69,9 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/DownloadsDataModel.hpp) \
         $$quote($$BASEDIR/src/MyIndexMapper.hpp) \
         $$quote($$BASEDIR/src/ProjectFile.hpp) \
+        $$quote($$BASEDIR/src/Stream.hpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.hpp) \
-        $$quote($$BASEDIR/src/UrlExtractor.hpp) \
+        $$quote($$BASEDIR/src/YTDownloadExtractor.hpp) \
         $$quote($$BASEDIR/src/YTManager.hpp) \
         $$quote($$BASEDIR/src/applicationui.hpp)
 }

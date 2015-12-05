@@ -5,8 +5,8 @@
  *      Author: Joshua
  */
 
-#ifndef URLEXTRACTOR_HPP_
-#define URLEXTRACTOR_HPP_
+#ifndef STREAM_HPP_
+#define STREAM_HPP_
 
 #include <QObject>
 #include <QNetworkAccessManager>
@@ -16,10 +16,12 @@ namespace Purple
 {
     struct Mapping
     {
-        QString first;
-        QString second;
-        QString third;
-        QString fourth;
+        typedef QString StringType;
+
+        StringType dimension;
+        StringType type;
+        StringType quality;
+        StringType additional_info;
     };
 
     class Constants
@@ -39,15 +41,18 @@ namespace Purple
     namespace HelperFunctions
     {
         QByteArray      fetchDecode( QString const & url );
-        QVariantMap     parseQueryString( QByteArray const & data );
+        QVariantMap     parseQueryString( QString const & data );
         QString         extractVideoID( QString const & url );
         QVariantList    extractSmap( QString const & key, QVariantMap const & data );
         QVariantList    extractDash( QString const & dashUrl );
         QVariantMap     getVideoInfo( QString const & videoID );
     }
+
     class Stream
     {
     public:
+
+        static bool sortByBitRate( Stream const & a, Stream const & b );
         typedef QPair<int, int> IntPair;
         Stream( QVariantMap const & sm, QString const & title );
 
@@ -95,8 +100,7 @@ namespace Purple
     class UrlFinder
     {
     public:
-        UrlFinder( QString const & videoUrl, bool start = false );
-        UrlFinder();
+        explicit        UrlFinder( QString const & videoUrl, bool start = false );
         void            startUrlExtraction();
         QString const & getTitle()const;
         QList<Stream>   getVideoStreams() const;
@@ -124,21 +128,13 @@ namespace Purple
                         m_cipherTag,
                         m_watchVideoUrl;
         QVariantList    m_formats;
-        QVariant        m_sm;
+        QVariantList    m_sm;
         QVariantList    m_asm;
         QList<Stream>   m_streams;
         QList<Stream>   m_audioStreams;
         QList<Stream>   m_videoStreams;
         bool            m_hasBasic;
     };
-
-    class UrlExtractor
-    {
-    public:
-        UrlExtractor();
-        virtual ~UrlExtractor();
-    };
-
 } /* namespace Purple */
 
-#endif /* URLEXTRACTOR_HPP_ */
+#endif /* STREAM_HPP_ */

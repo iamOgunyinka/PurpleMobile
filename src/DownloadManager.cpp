@@ -1,7 +1,7 @@
 #include <src/DownloadManager.hpp>
 #include <QTimer>
 #include <QUuid>
-#include <bb/data/JsonDataAccess.hpp>
+#include <QRegExp>
 
 namespace Purple
 {
@@ -11,6 +11,7 @@ namespace Purple
         openDownloadList();
     }
 
+    QString DownloadManager::downloads_path = "data/assets/download_queue.json";
     DownloadManager::~DownloadManager() {}
 
     void DownloadManager::setupDownloadManager()
@@ -24,7 +25,7 @@ namespace Purple
 
     void DownloadManager::openDownloadList()
     {
-        QFile file( "data/assets/download_queue.json" );
+        QFile file( DownloadManager::downloads_path );
         if( !file.exists() ){
             if( !file.open( QIODevice::ReadWrite| QIODevice::Text ) ){
                 qDebug() << "Unable to open file containing list of recent downloads";
@@ -36,7 +37,7 @@ namespace Purple
         }
 
         bb::data::JsonDataAccess jda;
-        m_downloadList = jda.load( "data/assets/download_queue.json" ).toList();
+        m_downloadList = jda.load( DownloadManager::downloads_path ).toList();
         if( jda.hasError() ){
             qDebug() << "Error found when loading download list";
             emit status( "", "Error", jda.error().errorMessage(), "" );
@@ -56,7 +57,9 @@ namespace Purple
 
     bool DownloadManager::isValidUrl( QString const & url )
     {
-        return QUrl( url, QUrl::StrictMode ).isValid();
+        QString const pattern = "^((http[s]?|ftp):\\/)?\\/?([^:\\/\\s]+)((\\/\\w+)*\\/)([\\w\\-\\.]+[^#?\\s]+)(.*)?(#[\\w\\-]+)?$";
+        QRegExp expr ( pattern );
+        return ( expr.exactMatch( url ) || expr.matchedLength() >= 2 );
     }
 
     void DownloadManager::startDownloadImpl( QString const & url, QString const & path )
@@ -78,8 +81,8 @@ namespace Purple
         item.m_tempFile = filePath + ".part";
         item.m_tempExists = tempExist;
 
-        QTimer::singleShot( 0, this, SLOT( startNextDownload() ) );
         m_downloadQueue.enqueue(item);
+        startNextDownload();
     }
 
     void DownloadManager::writeDownloadToFile( QString const & url )
@@ -89,17 +92,18 @@ namespace Purple
         if( item.m_file == NULL ){
             return;
         }
-        newDownload[ "url"] = item.m_url;
-        newDownload["status"] = "";
-        newDownload["percentage"] = 0;
-        newDownload["speed"] = "";
+        newDownload[ "url" ] = item.m_url;
+        newDownload[ "status" ] = "";
+        newDownload[ "percentage" ] = 0;
+        newDownload[ "speed" ] = "";
 
         m_downloadList.append( newDownload );
 
         bb::data::JsonDataAccess jda;
-        jda.save( m_downloadList, "data/assets/download_queue.json" );
+        jda.save( m_downloadList, DownloadManager::downloads_path );
         if( jda.hasError() ){
             qDebug() << "Unable to save new download to file";
+            return;
         }
         emit newDownloadAdded();
     }
@@ -186,24 +190,19 @@ namespace Purple
                 }
                 nextItem.m_tempSize = 0;
             }
-            QNetworkReply *reply = startDownloadRequest( request );
+
+            QNetworkReply *reply = m_networkManager.get( request );
+            QObject::connect( reply, SIGNAL(downloadProgress( qint64,qint64 )), this, SLOT(downloadProgress( qint64,qint64) ));
+            QObject::connect( reply, SIGNAL( finished() ), this, SLOT( downloadFinished() ) );
+            QObject::connect( reply, SIGNAL( readyRead() ), this, SLOT( downloadReadyRead() ) );
+            QObject::connect( reply, SIGNAL( error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError) ));
+
             nextItem.m_time.start();
             m_downloadHash[reply] = nextItem;
             m_urlHash[ nextItem.m_url ] = reply;
 
             startNextDownload();
         }
-    }
-
-    QNetworkReply* DownloadManager::startDownloadRequest( QNetworkRequest const & request )
-    {
-        QNetworkReply *reply = m_networkManager.get( request );
-        QObject::connect( reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(downloadProgress(qint64,qint64) ));
-        QObject::connect( reply, SIGNAL( finished() ), this, SLOT( downloadFinished() ) );
-        QObject::connect( reply, SIGNAL( readyRead() ), this, SLOT( downloadReadyRead() ) );
-        QObject::connect( reply, SIGNAL( error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError) ));
-
-        return reply;
     }
 
     void DownloadManager::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
@@ -254,8 +253,8 @@ namespace Purple
             qDebug() << "Iterating";
             QVariantMap item = m_downloadList[i].toMap();
             if( url == item["url"] ){
-                qDebug() << "Found necessary item";
-                item["status"] = QString::number( actualReceived ) + "bytes of " + QString::number( actualTotal ) + "bytes";
+                qDebug() << "Found item to update";
+                item[ "status" ] = QString::number( actualReceived ) + "bytes of " + QString::number( actualTotal ) + "bytes";
                 item["percentage"] = percent;
                 item["speed"] = QString::number( speed ) + unit;
                 m_downloadList[i] = item;
@@ -265,7 +264,7 @@ namespace Purple
         }
 
         bb::data::JsonDataAccess jda;
-        jda.save( m_downloadList, "data/assets/download_queue.json" );
+        jda.save( m_downloadList, DownloadManager::downloads_path );
         if( jda.hasError() ){
             qDebug() << "Unable to update file: " << url;
         }

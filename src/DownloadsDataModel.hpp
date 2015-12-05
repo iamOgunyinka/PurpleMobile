@@ -9,8 +9,6 @@
 #define DOWNLOADSDATAMODEL_HPP_
 
 #include <bb/cascades/DataModel>
-#include <bb/data/JsonDataAccess>
-#include <QStringList>
 #include "DownloadManager.hpp"
 
 namespace Purple
@@ -33,7 +31,6 @@ namespace Purple
 
         DownloadManager        *m_downloadManager;
         QVariantList            m_downloadList;
-//        QString                 m_url;
     public slots:
         QVariantList            downloadsList();
         Q_INVOKABLE int         childCount( QVariantList const & indexPath );

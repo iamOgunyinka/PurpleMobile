@@ -7,7 +7,8 @@
 
 #include <src/DownloadsDataModel.hpp>
 #include "MyIndexMapper.hpp"
-#include <QThread>
+//#include <c++/4.6.3/thread>
+//#include <c++/4.6.3/condition_variable>
 
 namespace Purple
 {
@@ -25,7 +26,7 @@ namespace Purple
 
     DownloadsDataModel::~DownloadsDataModel()
     {
-        QFile file( "data/assets/download_queue.json" );
+        QFile file( DownloadManager::downloads_path );
         if( file.open( QIODevice::ReadOnly ) ){
             QTextStream text( &file );
             qDebug() << text.readAll();
@@ -35,11 +36,12 @@ namespace Purple
 
     void DownloadsDataModel::onNewDownloadAdded()
     {
-        load( "download_queue.json" );
+        load( DownloadManager::downloads_path );
     }
 
     void DownloadsDataModel::startDownload( QString const & url )
     {
+//        std::thread foreign_thread( startDownload, m_downloadManager, url );
         m_downloadManager->startDownload( url );
     }
 
@@ -75,14 +77,13 @@ namespace Purple
     void DownloadsDataModel::load( QString const & sourceFile )
     {
         bb::data::JsonDataAccess jda;
-        QVariantList list = jda.load( "data/assets/" + sourceFile ).toList();
+        QVariantList list = jda.load( sourceFile ).toList();
 
         if( jda.hasError() ){
             emit error( jda.error().errorMessage() );
             return;
         }
-        qDebug() << "Loaded new file: " << QString ( "data/assets/%1").arg( sourceFile );
-
+        qDebug() << "Loaded new file: " << sourceFile;
         for( int i = 0; i != list.size(); ++i ){
             m_downloadList.append( list[i].toMap() );
         }
