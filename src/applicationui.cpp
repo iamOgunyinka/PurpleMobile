@@ -6,9 +6,9 @@
 #include <bb/cascades/QmlDocument>
 #include <bb/cascades/AbstractPane>
 #include <bb/cascades/LocaleHandler>
-#include <src/DownloadManager.hpp>
 #include <src/DownloadsDataModel.hpp>
-#include <src/YTManager.hpp>
+#include <src/YTDownloadExtractor.hpp>
+#include <src/ThumbnailSaver.hpp>
 
 using namespace bb::cascades;
 using Purple::ApplicationUI;
@@ -27,18 +27,14 @@ ApplicationUI::ApplicationUI() :
 
     // initial load
     onSystemLanguageChanged();
-    writeSettingsFile();
 
     qmlRegisterType<Purple::DownloadsDataModel>( "purple.model", 1, 0, "CppDataModel" );
-    qmlRegisterType<Purple::YTDataManager> ( "purple.searchModel", 1, 0, "SearchDataModel" );
+    qmlRegisterType<Purple::YTDownloadExtractor>( "purple.ytde", 1, 0, "CppYTDownloadExtractor");
+    qmlRegisterType<Purple::ThumbnailSaver>( "purple.image", 1, 0, "CppImageFetcher");
 
     // Create scene document from main.qml asset, the parent is set
     // to ensure the document gets destroyed properly at shut down.
     QmlDocument *qml = QmlDocument::create("asset:///main.qml").parent(this);
-
-    QDeclarativePropertyMap *map = new QDeclarativePropertyMap;
-    map->insert( "settings", QVariant( "data/assets/settings.json" ) );
-    qml->setContextProperty( "dirPath", map );
 
     // Create root object for the UI
     AbstractPane *root = qml->createRootObject<AbstractPane>();
@@ -54,29 +50,5 @@ void ApplicationUI::onSystemLanguageChanged()
     QString file_name = QString("Purple_%1").arg(locale_string);
     if (m_pTranslator->load(file_name, "app/native/qm")) {
         QCoreApplication::instance()->installTranslator(m_pTranslator);
-    }
-}
-
-void ApplicationUI::writeSettingsFile()
-{
-    QDir dir;
-    dir.mkpath( "data/assets/" );
-
-    QFile textFile( "data/assets/settings.json" );
-    if( !textFile.exists() )
-    {
-        textFile.open( QIODevice::WriteOnly | QIODevice::Text );
-        QTextStream out( &textFile );
-
-        out << "[\n" << "{\n"
-                << "\"apiKey\": \"AIzaSyBhl_zBnEEv_xiIukkMpz8ayoiwT1UdfQk\",\n"
-                << "\"maxResult\": 40,\n"
-                << "\"youtube_url\": \"https://www.googleapis.com/youtube/v3/search/?part=snippet\",\n"
-                << "\"appTheme\": \"Light\",\n"
-                << "\"safeSearch\": \"Moderate\",\n"
-                << "\"thumbnailsQuality\": \"Default\",\n"
-                << "\"existsAction\": \"Overwrite\"\n"
-                << "}\n" << "]\n";
-        textFile.close();
     }
 }

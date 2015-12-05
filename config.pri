@@ -37,7 +37,6 @@ simulator {
 config_pri_assets {
     OTHER_FILES += \
         $$quote($$BASEDIR/assets/DownloadManager.qml) \
-        $$quote($$BASEDIR/assets/MySettings.qml) \
         $$quote($$BASEDIR/assets/ad_search.png) \
         $$quote($$BASEDIR/assets/download.png) \
         $$quote($$BASEDIR/assets/downloads_icon.png) \
@@ -55,12 +54,11 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/DownloadManager.cpp) \
         $$quote($$BASEDIR/src/DownloadsDataModel.cpp) \
         $$quote($$BASEDIR/src/MyIndexMapper.cpp) \
-        $$quote($$BASEDIR/src/ProjectFile.cpp) \
         $$quote($$BASEDIR/src/Stream.cpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.cpp) \
+        $$quote($$BASEDIR/src/ThumbnailSaver.cpp) \
         $$quote($$BASEDIR/src/YTDownloadExtractor.cpp) \
         $$quote($$BASEDIR/src/YTDownloadExtractor_test.cpp) \
-        $$quote($$BASEDIR/src/YTManager.cpp) \
         $$quote($$BASEDIR/src/applicationui.cpp) \
         $$quote($$BASEDIR/src/main.cpp)
 
@@ -68,11 +66,10 @@ config_pri_source_group1 {
         $$quote($$BASEDIR/src/DownloadManager.hpp) \
         $$quote($$BASEDIR/src/DownloadsDataModel.hpp) \
         $$quote($$BASEDIR/src/MyIndexMapper.hpp) \
-        $$quote($$BASEDIR/src/ProjectFile.hpp) \
         $$quote($$BASEDIR/src/Stream.hpp) \
         $$quote($$BASEDIR/src/SyncNetworkManager.hpp) \
+        $$quote($$BASEDIR/src/ThumbnailSaver.hpp) \
         $$quote($$BASEDIR/src/YTDownloadExtractor.hpp) \
-        $$quote($$BASEDIR/src/YTManager.hpp) \
         $$quote($$BASEDIR/src/applicationui.hpp)
 }
 

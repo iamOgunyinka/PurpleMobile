@@ -298,6 +298,8 @@ namespace Purple
 
         m_watchVideoUrl = Constants::urls["watch_v"].toString().arg( m_videoID );
         fetchBasic();
+
+        emit finished();
     }
 
     void UrlFinder::fetchBasic()

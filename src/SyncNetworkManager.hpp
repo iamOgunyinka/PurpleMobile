@@ -5,7 +5,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QList>
-#include "ProjectFile.hpp"
 
 namespace Purple
 {

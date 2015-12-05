@@ -97,16 +97,20 @@ namespace Purple
                 m_encrypted;
     };
 
-    class UrlFinder
+    class UrlFinder: public QObject
     {
+        Q_OBJECT
     public:
         explicit        UrlFinder( QString const & videoUrl, bool start = false );
-        void            startUrlExtraction();
         QString const & getTitle()const;
         QList<Stream>   getVideoStreams() const;
         QList<Stream>   getAudioStreams() const;
         QList<Stream>   getAllStreams() const;
         int             getVideoStreamLength() const;
+    public slots:
+        void            startUrlExtraction();
+    signals:
+        void            finished();
     private:
         void            initFunctions();
         void            fetchBasic();
