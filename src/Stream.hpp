@@ -24,9 +24,8 @@ namespace Purple
         StringType additional_info;
     };
 
-    class Constants
+    struct Constants
     {
-    public:
         static int         lifespan;
         static QString     user_agent;
         static QString     uefsm;
@@ -51,7 +50,6 @@ namespace Purple
     class Stream
     {
     public:
-
         static bool sortByBitRate( Stream const & a, Stream const & b );
         typedef QPair<int, int> IntPair;
         Stream( QVariantMap const & sm, QString const & title );
@@ -101,7 +99,7 @@ namespace Purple
     {
         Q_OBJECT
     public:
-        explicit        UrlFinder( QString const & videoUrl, bool start = false );
+        explicit        UrlFinder( QString const & videoUrl );
         QString const & getTitle()const;
         QList<Stream>   getVideoStreams() const;
         QList<Stream>   getAudioStreams() const;
@@ -111,6 +109,7 @@ namespace Purple
         void            startUrlExtraction();
     signals:
         void            finished();
+        void            error( QString const & message );
     private:
         void            initFunctions();
         void            fetchBasic();

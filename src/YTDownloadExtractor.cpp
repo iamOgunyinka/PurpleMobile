@@ -25,6 +25,7 @@ namespace Purple
 
         QObject::connect( new_thread, SIGNAL( started()), urlFinder, SLOT( startUrlExtraction() ) );
         QObject::connect( urlFinder, SIGNAL(finished()), this, SLOT( onFinished() ) );
+        QObject::connect( urlFinder, SIGNAL( error( QString )), this, SLOT( onError( QString )));
         QObject::connect( urlFinder, SIGNAL(finished()), new_thread, SLOT(quit()));
         QObject::connect( new_thread, SIGNAL( finished()), new_thread, SLOT( deleteLater() ) );
 
@@ -45,18 +46,29 @@ namespace Purple
     void YTDownloadExtractor::onFinished()
     {
         UrlFinder *urlFinder = qobject_cast<UrlFinder*>( sender() );
-        if( urlFinder == NULL ) return;
+        if( urlFinder == NULL ){
+            emit error( "NULL" );
+            return;
+        }
 
         m_title = urlFinder->getTitle();
-        m_downloadStreams = urlFinder->getAllStreams();
+        m_downloadStreams.clear();
+        m_downloadStreams = urlFinder->getVideoStreams();
+        m_downloadStreams.append( urlFinder->getAudioStreams() );
+
         m_timeFrame = QString( "Video Length: %1" ).arg(
-                    QDateTime::fromTime_t( urlFinder->getVideoStreamLength() ).toUTC().toString("hh:mm:ss")
-                    );
+                QDateTime::fromTime_t( urlFinder->getVideoStreamLength() ).toUTC().toString("hh:mm:ss")
+        );
 
         QStringList list;
         for( int i = 0; i != m_downloadStreams.size(); ++i ){
             list.append( m_downloadStreams[i].extension() + "( " + m_downloadStreams[i].resolution() + " )" );
         }
         emit finished( list );
+    }
+
+    void YTDownloadExtractor::onError( QString const & message )
+    {
+        emit error( message );
     }
 }

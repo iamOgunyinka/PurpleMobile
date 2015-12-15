@@ -11,6 +11,7 @@
 #include <QRegExp>
 #include <QDomDocument>
 #include <QStringList>
+#include <QDebug>
 
 namespace Purple
 {
@@ -26,7 +27,7 @@ namespace Purple
     void Constants::init()
     {
         urls["gdata"]= "http://gdata.youtube.com/feeds/api/videos/%1?v=2";
-        urls["watch_v"] = "http://www.youtube.com/watch?v=%1";
+        urls["watch_v"] = "http://www.youtube.com/watch?v=";
         urls["vidinfo"] = "http://www.youtube.com/get_video_info?video_id=%1&asv=3&el=detailpage&hl=en_US";
         urls["playlist"] = "http://www.youtube.com/list_ajax?style=json&action_get_list=1&list=%1";
         urls["age_vidinfo"] = "http://www.youtube.com/get_video_info?video_id=%1&eurl="
@@ -90,6 +91,7 @@ namespace Purple
         itags["302"] = Mapping{  "1280x720", "webm", "video", "VP9" };
         itags["303"] = Mapping{  "1920x1080", "webm", "video", "VP9" };
     }
+
     namespace HelperFunctions
     {
         QByteArray fetchDecode( QString const & url_ )
@@ -102,25 +104,34 @@ namespace Purple
             QNetworkAccessManager networkManager;
             QNetworkReply *reply = networkManager.get( QNetworkRequest( QUrl( url ) ) );
 
+            qDebug() << "Just entered fetchDecode with url: " << url;
             QEventLoop loop;
 
             QObject::connect( reply, SIGNAL(finished()), &loop, SLOT( quit() ) );
             QObject::connect( reply, SIGNAL(error(QNetworkReply::NetworkError)), &loop, SLOT(quit()) );
             loop.exec();
 
+            if( reply->error() != QNetworkReply::NoError ){
+                throw QString( reply->errorString() );
+            }
+            qDebug() << "We are done in fetchDecode with URL: " << url;
             return reply->readAll();
         }
 
         inline QVariantMap parseQueryString( QString const & data )
         {
-            QUrl urlQuery( data );
-            QList<QPair<QByteArray, QByteArray> > list = urlQuery.encodedQueryItems();
+            qDebug() << "Received is " << data;
 
+            QUrl urlQuery( data );
+            QList<QPair<QString, QString> > list = urlQuery.queryItems();
+
+            if( list.isEmpty() ){
+                throw QString( "Unable to parse response" );
+            }
             QVariantMap map;
-            if( !list.isEmpty() ){
-                for( QList<QPair<QByteArray, QByteArray> >::iterator m = list.begin(); m != list.end(); ++m ){
-                    map.insert( m->first, m->second );
-                }
+            for( QList<QPair<QString, QString> >::iterator m = list.begin(); m != list.end(); ++m ){
+                qDebug() << m->first << "....." << m->second << "\n";
+                map.insert( m->first, m->second );
             }
             return map;
         }
@@ -130,10 +141,10 @@ namespace Purple
             QString const re_string = "(?:^|[^\\w-]+)([\\w-]{11})(?:[^\\w-]+|$)";
             QRegExp re( re_string );
 
-            if( re.indexIn( url ) != -1 ){
-                return re.cap(1);
+            if( re.indexIn( url ) == -1 ){
+                throw QString( "Invalid URL" );
             }
-            return QString();
+            return re.cap(1);
         }
 
         QVariantList extractSmap( QString const & key, QVariantMap const & data )
@@ -200,17 +211,21 @@ namespace Purple
 
         QVariantMap getVideoInfo( QString const & videoID )
         {
-            QString url = Constants::urls["vidinfo"].toString().arg( videoID );
-            QByteArray info = fetchDecode( url ); //May throw an exception from fetchDecode
-            if( info.isEmpty() ) return QVariantMap();
+            QString url = "http://www.youtube.com/get_video_info?video_id=" + videoID + "&asv=3&el=detailpage&hl=en_US";
+            QByteArray info = fetchDecode( url );
+
+            qDebug() << "Info is " << info;
+            if( info.isEmpty() ) {
+                throw QString( "Unable to fetch video information" );
+            }
 
             return parseQueryString( info );
         }
-
     }
 
     Stream::Stream( QVariantMap const & sm, QString const & title ): m_title( title )
     {
+        Constants::init();
         init( sm );
     }
 
@@ -269,6 +284,7 @@ namespace Purple
     QString const & Stream::mediaType() const { return m_mediaType; }
     QString const & Stream::filename() const { return m_filename; }
     Stream::IntPair Stream::dimension() const { return m_dimension; }
+
     QString Stream::url_https() const
     {
         QString temp = m_url;
@@ -276,17 +292,19 @@ namespace Purple
     }
     bool Stream::sortByBitRate( Stream const & a, Stream const & b ){ return a.extension() < b.extension(); }
 
-    UrlFinder::UrlFinder( QString const & videoUrl, bool start ): m_videoUrl( videoUrl )
+    UrlFinder::UrlFinder( QString const & videoUrl ): m_videoUrl( videoUrl ), m_hasBasic( false )
     {
-        if( start ){
-            startUrlExtraction();
-        }
     }
 
     void UrlFinder::startUrlExtraction()
     {
         if( !m_hasBasic ){
-            initFunctions();
+            try {
+                initFunctions();
+                emit finished();
+            } catch ( QString const & message ) {
+                emit error( message );
+            }
         }
     }
 
@@ -296,10 +314,9 @@ namespace Purple
     {
         m_videoID = HelperFunctions::extractVideoID( m_videoUrl );
 
-        m_watchVideoUrl = Constants::urls["watch_v"].toString().arg( m_videoID );
-        fetchBasic();
+        m_watchVideoUrl = Constants::urls["watch_v"].toString() + m_videoID;
 
-        emit finished();
+        fetchBasic();
     }
 
     void UrlFinder::fetchBasic()
@@ -309,7 +326,9 @@ namespace Purple
         m_hasBasic = true;
         fetchBasicDelegate();
         QVariantList dash = HelperFunctions::extractDash( m_dashUrl );
-        if( dash.isEmpty() ) return;
+        if( dash.isEmpty() ){
+            throw QString( "Unspecified error occurred" );
+        }
 
         processStreams( dash );
     }

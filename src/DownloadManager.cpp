@@ -2,6 +2,7 @@
 #include <QTimer>
 #include <QUuid>
 #include <QRegExp>
+#include <QDir>
 
 namespace Purple
 {
@@ -27,6 +28,9 @@ namespace Purple
     {
         QFile file( DownloadManager::downloads_path );
         if( !file.exists() ){
+            QDir dir;
+            dir.mkpath( "data/assets/" );
+
             if( !file.open( QIODevice::ReadWrite| QIODevice::Text ) ){
                 qDebug() << "Unable to open file containing list of recent downloads";
                 return;
@@ -250,7 +254,6 @@ namespace Purple
         qDebug() << "In update download";
         for( int i = 0; i != m_downloadList.size(); ++i )
         {
-            qDebug() << "Iterating";
             QVariantMap item = m_downloadList[i].toMap();
             if( url == item["url"] ){
                 qDebug() << "Found item to update";

@@ -38,19 +38,15 @@ TabbedPane {
             onFinished: {
                 if( value == SystemUiResult.ConfirmButtonSelection ){
                     ytDownloadExtractor.downloadVideoWithER( 
-                        list_of_video_formats.selectedIndices[0]
-                        )
+                    list_of_video_formats.selectedIndices[0]
+                    )
                 }
             }
         },
         SystemProgressDialog {
             id: progress
             title: "Retrieving video information"
-            onFinished: {
-                if( value == SystemUiResult.CancelButtonSelection ){
-                    // TODO
-                }
-            }
+            body: "Please wait..."
         },
         CppYTDownloadExtractor {
             id: ytDownloadExtractor
@@ -58,7 +54,7 @@ TabbedPane {
         CppImageFetcher {
             id: imageFetcher
         }
-        
+    
     ]
     Tab {
         id: homeTab
@@ -68,7 +64,7 @@ TabbedPane {
         Page {
             titleBar: TitleBar {
                 id: homepageTitleBar
-                title: "Purple"
+                title: "Purple Mobile"
                 acceptAction: ActionItem {
                     title: "Close"
                     onTriggered: {
@@ -79,6 +75,22 @@ TabbedPane {
             id: homepageTab
             Container {
                 topPadding: 20
+                SegmentedControl {
+                    id: selectedDownloadOption
+                    options: [
+                        Option {
+                            text: "Direct Download"
+                            value: 1
+                        },
+                        Option {
+                            text: "Youtube Videos"
+                            value: 2
+                        }
+                    ]
+                    onCreationCompleted: {
+                        selectedDownloadOption.setSelectedIndex( 0 )
+                    }
+                }
                 Container {
                     layout: StackLayout {
                         orientation: LayoutOrientation.LeftToRight
@@ -91,8 +103,7 @@ TabbedPane {
                         input {
                             submitKey: SubmitKey.Submit
                             onSubmitted: {
-                                ytDownloadExtractor.getDownloadInfo( txtUrl.text )
-                                progress.show()
+                                homepageTab.download( txtUrl.text )
                             }
                         }
                     }
@@ -103,7 +114,7 @@ TabbedPane {
                         maxWidth: 1
                         
                         onClicked: {
-                            ytDownloadExtractor.getDownloadInfo( txtUrl.text )
+                            homepageTab.download ( txtUrl.text )
                         }
                     }
                 }
@@ -111,8 +122,18 @@ TabbedPane {
                     leftPadding: 20
                     horizontalAlignment: HorizontalAlignment.Center
                     verticalAlignment: VerticalAlignment.Center
-
+                    
                     controls: videoContainer
+                }
+            }
+            
+            function download( text )
+            {
+                if( selectedDownloadOption.selectedValue == 1 ){
+                    downloadManager.startNewDownload( text )
+                } else {
+                    ytDownloadExtractor.getDownloadInfo( text )
+                    progress.show()
                 }
             }
             
@@ -122,12 +143,19 @@ TabbedPane {
                 lblTitle = ytDownloadExtractor.title
                 imageFetcher.fetchImage( ytDownloadExtractor.thumbnail )
                 
+                list_of_video_formats.clearList()
                 for( var i = 0; i < streams.length; ++i )
                 {
                     list_of_video_formats.appendItem( streams[i] )
                 }
+                progress.cancel()
             }
             
+            function onError( error )
+            {
+                console.log( error )
+                progress.cancel()
+            }
             function onUrlExtracted( videoUrl )
             {
                 downloadManager.startNewDownload( videoUrl )
@@ -140,6 +168,7 @@ TabbedPane {
             
             onCreationCompleted: {
                 ytDownloadExtractor.finished.connect( homepageTab.onStreamsAvailable )
+                ytDownloadExtractor.error.connect( homepageTab.onError )
                 ytDownloadExtractor.url.connect( homepageTab.onUrlExtracted )
                 imageFetcher.imageFetched.connect( homepageTab.onImageFetched )
             }
@@ -194,7 +223,17 @@ TabbedPane {
         title: "Help me"
         imageSource: "asset:///property.png"
         Page {
-            // TODO
+            titleBar: TitleBar {
+                title: "Help"
+            }
+            Container {
+                layout: StackLayout {}
+                topPadding: 20
+                leftPadding: 20
+                controls: Help {
+                    
+                }
+            }
         }
     }
 }

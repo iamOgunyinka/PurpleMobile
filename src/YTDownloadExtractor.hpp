@@ -30,13 +30,14 @@ namespace Purple
         QString       m_title;
         QString       m_timeFrame;
     signals:
-//        void error( QString const & what );
+        void error( QString const & what );
         void url( QString const & videoUrl );
         void finished( QStringList const & streams );
     public slots:
         Q_INVOKABLE void getDownloadInfo( QString const & url );
         Q_INVOKABLE void downloadVideoWithER( QString const & url );
         void onFinished( );
+        void onError( QString const & what );
     };
 } //Purple
 #endif /* YTDOWNLOADEXTRACTOR_HPP_ */
